@@ -143,6 +143,9 @@ public sealed class AormsBridge : IDisposable
     public long EnqueueArtifact(string entity, string entityId, object payload, string? contentHash = null, string? storageKey = null) =>
         _db.EnqueueArtifact(entity, entityId, payload, contentHash, storageKey);
 
+    /// <summary>Pending meta/artifact outbox counts for Connect DB connector UI.</summary>
+    public OutboxCounts OutboxCounts() => _db.CountPendingOutbox();
+
     /// <summary>
     /// Drain PENDING outboxes to hub. Returns skipped reason when not sync-ready.
     /// Meta POST /api/sync/meta · Artifact POST /api/sync/ingest (JSON envelope; binary upload wave 2).

@@ -58,3 +58,11 @@ public sealed class FlushResult
     public int ArtifactsSent { get; init; }
     public string? SkippedReason { get; init; }
 }
+
+/// <summary>Pending rows in firm.db outboxes (Connect DB connector).</summary>
+public sealed class OutboxCounts
+{
+    public int PendingMeta { get; init; }
+    public int PendingArtifacts { get; init; }
+    public int TotalPending => PendingMeta + PendingArtifacts;
+}

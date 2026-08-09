@@ -208,6 +208,17 @@ public sealed class FirmDb : IDisposable
         return (long)(cmd.ExecuteScalar() ?? 0L);
     }
 
+    public OutboxCounts CountPendingOutbox()
+    {
+        using var meta = _con.CreateCommand();
+        meta.CommandText = "SELECT COUNT(*) FROM meta_outbox WHERE state='PENDING'";
+        var pendingMeta = Convert.ToInt32(meta.ExecuteScalar() ?? 0);
+        using var art = _con.CreateCommand();
+        art.CommandText = "SELECT COUNT(*) FROM artifact_outbox WHERE state='PENDING'";
+        var pendingArt = Convert.ToInt32(art.ExecuteScalar() ?? 0);
+        return new OutboxCounts { PendingMeta = pendingMeta, PendingArtifacts = pendingArt };
+    }
+
     public List<(long Id, string Entity, string EntityId, string Op, string PayloadJson)> PendingMeta(int limit = 50)
     {
         using var cmd = _con.CreateCommand();
