@@ -26,6 +26,8 @@ public sealed class ProjectInfo
     public string Pan { get; set; } = "";
     /// <summary>Absolute or relative path to project logo image (png/jpg).</summary>
     public string LogoPath { get; set; } = "";
+    /// <summary>AORMS Connect / hub project UUID for Flush + JM pull (S11).</summary>
+    public string HubProjectId { get; set; } = "";
 
     public static readonly string[] PreparedByRoles = { "Engineer", "Architect", "PMC" };
 
@@ -43,7 +45,8 @@ public sealed class ProjectInfo
         ["gstin"] = Gstin,
         ["cin"] = Cin,
         ["pan"] = Pan,
-        ["logo_path"] = LogoPath
+        ["logo_path"] = LogoPath,
+        ["hub_project_id"] = HubProjectId
     };
 
     public void LoadFrom(JsonObject? o)
@@ -62,6 +65,7 @@ public sealed class ProjectInfo
         Cin = o["cin"]?.GetValue<string>() ?? "";
         Pan = o["pan"]?.GetValue<string>() ?? "";
         LogoPath = o["logo_path"]?.GetValue<string>() ?? "";
+        HubProjectId = o["hub_project_id"]?.GetValue<string>() ?? "";
     }
 
     public void Reset()
@@ -79,6 +83,7 @@ public sealed class ProjectInfo
         Cin = "";
         Pan = "";
         LogoPath = "";
+        HubProjectId = "";
     }
 
     /// <summary>"GSTIN: … · CIN: … · PAN: …" for the present IDs, or empty.</summary>

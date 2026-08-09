@@ -89,6 +89,8 @@ AQC, then AStudio / AConsulting.
 | `EnqueueMeta(event)` | local outbox | No network |
 | `EnqueueArtifact(entity, bytes, dto)` | local outbox | Content-hash skip |
 | `Flush()` | `POST /api/sync/meta` + `POST /api/sync/ingest` | Bearer `syncToken` |
+| `OutboxCounts()` | local | Pending meta/artifact rows |
+| `PullJointMeasurements(projectId)` | `GET /api/ops/joint-measurements` | APPROVED JM + lines (S11) |
 | `PullMeta()` | `GET /api/sync/meta/catch-up` | Multi-seat wave 2 |
 | `HubConfigured` | local | `{ hubUrl, hasSyncToken, syncReady }` |
 
@@ -103,8 +105,9 @@ Env / settings (align HUB-API):
 
 ### Artifacts (`SyncEntity`)
 
-`drawing` Â· `transmittal` Â· `invoice` Â· `approval` Â· `tender` Â· `runningBill` Â·
-`inspection` Â· `siteVisit` Â· `siteReference` Â· `progressReport`
+`drawing` · `transmittal` · `invoice` · `approval` · `tender` · `runningBill` ·
+`inspection` · `siteVisit` · `siteReference` · `progressReport` · **`jointMeasurement`**
+(APPROVED abstract; lines via `/api/ops/joint-measurements`)
 
 ### Metadata (`MetaEntity`)
 

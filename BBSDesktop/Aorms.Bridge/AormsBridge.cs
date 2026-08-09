@@ -267,6 +267,96 @@ public sealed class AormsBridge : IDisposable
         _db.UpsertLocalTask(taskId, projectId, title, status, "PUBLISHED");
     }
 
+    /// <summary>
+    /// GET /api/ops/joint-measurements?projectId= — APPROVED JM lines for Estimation pull (S11).
+    /// </summary>
+    public async Task<IReadOnlyList<JointMeasurementBundle>> PullJointMeasurementsAsync(
+        string projectId,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(projectId))
+            throw new ArgumentException("projectId required", nameof(projectId));
+
+        var cfg = HubConfigured();
+        if (!cfg.SyncReady)
+            throw new InvalidOperationException(cfg.HasSyncToken ? "hub_unconfigured" : "missing_sync_token");
+
+        var (syncToken, hubUrl, _) = _db.ReadAuth();
+        var hub = (hubUrl ?? cfg.HubUrl).TrimEnd('/');
+        var url = $"{hub}/api/ops/joint-measurements?projectId={Uri.EscapeDataString(projectId.Trim())}";
+        using var req = new HttpRequestMessage(HttpMethod.Get, url);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", syncToken);
+        using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        var text = await res.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            throw new HttpRequestException($"PullJointMeasurements failed {(int)res.StatusCode}: {text}");
+
+        using var doc = JsonDocument.Parse(text);
+        if (!doc.RootElement.TryGetProperty("jointMeasurements", out var arr) ||
+            arr.ValueKind != JsonValueKind.Array)
+            return Array.Empty<JointMeasurementBundle>();
+
+        var list = new List<JointMeasurementBundle>();
+        foreach (var el in arr.EnumerateArray())
+        {
+            var lines = new List<JointMeasurementLineDto>();
+            if (el.TryGetProperty("lines", out var linesEl) && linesEl.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var line in linesEl.EnumerateArray())
+                {
+                    lines.Add(new JointMeasurementLineDto
+                    {
+                        Id = Str(line, "id"),
+                        Code = OptStr(line, "code"),
+                        Description = Str(line, "description"),
+                        Uom = Str(line, "uom"),
+                        MeasureKind = OptStr(line, "measureKind"),
+                        LengthMm = OptDbl(line, "lengthMm"),
+                        BreadthMm = OptDbl(line, "breadthMm"),
+                        HeightMm = OptDbl(line, "heightMm"),
+                        CountNos = OptDbl(line, "countNos"),
+                        Quantity = OptDbl(line, "quantity") ?? 0,
+                        SortOrder = (int)(OptDbl(line, "sortOrder") ?? 0),
+                    });
+                }
+            }
+
+            list.Add(new JointMeasurementBundle
+            {
+                Id = Str(el, "id"),
+                ProjectId = Str(el, "projectId"),
+                ContractorId = OptStr(el, "contractorId"),
+                Subject = Str(el, "subject"),
+                MeasuredOn = OptStr(el, "measuredOn"),
+                Status = Str(el, "status"),
+                ReviewedAt = OptStr(el, "reviewedAt"),
+                Lines = lines,
+            });
+        }
+
+        return list;
+    }
+
+    static string Str(JsonElement el, string name)
+    {
+        if (!el.TryGetProperty(name, out var p) || p.ValueKind == JsonValueKind.Null) return "";
+        return p.ValueKind == JsonValueKind.String ? p.GetString() ?? "" : p.ToString();
+    }
+
+    static string? OptStr(JsonElement el, string name)
+    {
+        if (!el.TryGetProperty(name, out var p) || p.ValueKind == JsonValueKind.Null) return null;
+        return p.ValueKind == JsonValueKind.String ? p.GetString() : p.ToString();
+    }
+
+    static double? OptDbl(JsonElement el, string name)
+    {
+        if (!el.TryGetProperty(name, out var p) || p.ValueKind == JsonValueKind.Null) return null;
+        if (p.ValueKind == JsonValueKind.Number && p.TryGetDouble(out var d)) return d;
+        if (p.ValueKind == JsonValueKind.String && double.TryParse(p.GetString(), out var s)) return s;
+        return null;
+    }
+
     public void Dispose()
     {
         _http.Dispose();

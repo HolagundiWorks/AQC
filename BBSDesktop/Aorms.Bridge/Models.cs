@@ -66,3 +66,31 @@ public sealed class OutboxCounts
     public int PendingArtifacts { get; init; }
     public int TotalPending => PendingMeta + PendingArtifacts;
 }
+
+/// <summary>APPROVED joint measurement bundle from GET /api/ops/joint-measurements (S11).</summary>
+public sealed class JointMeasurementBundle
+{
+    public string Id { get; init; } = "";
+    public string ProjectId { get; init; } = "";
+    public string? ContractorId { get; init; }
+    public string Subject { get; init; } = "";
+    public string? MeasuredOn { get; init; }
+    public string Status { get; init; } = "APPROVED";
+    public string? ReviewedAt { get; init; }
+    public List<JointMeasurementLineDto> Lines { get; init; } = new();
+}
+
+public sealed class JointMeasurementLineDto
+{
+    public string Id { get; init; } = "";
+    public string? Code { get; init; }
+    public string Description { get; init; } = "";
+    public string Uom { get; init; } = "";
+    public string? MeasureKind { get; init; }
+    public double? LengthMm { get; init; }
+    public double? BreadthMm { get; init; }
+    public double? HeightMm { get; init; }
+    public double? CountNos { get; init; }
+    public double Quantity { get; init; }
+    public int SortOrder { get; init; }
+}

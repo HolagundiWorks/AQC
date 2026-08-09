@@ -178,6 +178,7 @@ public sealed partial class MainWindow : Window, IAppCommandBus, IAssistantConfi
             Cmd("links", "Item links", Glyph("\uE71B")),
             Cmd("datamodel", "Data model", Glyph("\uE8AB")),
             Cmd("ratebook", "Rate book", Glyph("\uE8F1")),
+            Cmd("pull_jm", "Pull JM", Glyph("\uE895")),
             Cmd("report", "Report", Glyph("\uE8A5")),
             Cmd("settings_project", "Project", Glyph("\uE8B7")),
             Cmd("settings_engineering", "Engineering", Glyph("\uE90F")),
@@ -452,6 +453,12 @@ public sealed partial class MainWindow : Window, IAppCommandBus, IAssistantConfi
 
     private void NavigateTo(string tag)
     {
+        if (string.Equals(tag, "pull_jm", StringComparison.OrdinalIgnoreCase))
+        {
+            _ = PullJointMeasurementsAsync();
+            return;
+        }
+
         _activeTag = tag;
         // Keep matching tab selected for context; ribbon stays expanded.
         var owner = _tabs.FirstOrDefault(t => t.Commands.Any(c => c.Tag == tag));
@@ -524,6 +531,23 @@ public sealed partial class MainWindow : Window, IAppCommandBus, IAssistantConfi
 
         var label = owner?.Commands.FirstOrDefault(c => c.Tag == tag)?.Label ?? tag;
         RibbonPageLabel.Text = label;
+    }
+
+    /// <summary>S11 — pull APPROVED joint measurements into rate book + earthwork MB.</summary>
+    private async Task PullJointMeasurementsAsync()
+    {
+        AppNotify.Info("Pull JM", "Fetching approved joint measurements from hub…");
+        var result = await JointMeasurementPull.PullAsync().ConfigureAwait(true);
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            AppNotify.Error("Pull JM failed", result.Error);
+            return;
+        }
+
+        AppNotify.Success(
+            "Pull JM",
+            $"{result.Bundles} measurement(s) · {result.MbRowsAdded} MB row(s) · {result.RateItemsAdded} rate item(s) · project {result.ProjectId}");
+        NavigateTo("earthwork");
     }
 
     private void RefreshCommandHighlight()
