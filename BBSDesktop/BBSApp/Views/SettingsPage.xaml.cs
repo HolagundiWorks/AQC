@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Human Centric Works, Hospet
 
 using System.Globalization;
+using Aorms.Bridge;
 using BBSApp.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -66,8 +67,60 @@ public sealed partial class SettingsPage : Page
         CinBox.Text = info.Cin;
         PanBox.Text = info.Pan;
         _pendingLogoPath = info.LogoPath ?? "";
+        HubProjectIdBox.Text = info.HubProjectId ?? "";
         RefreshLogoPreview();
         LoadPersonaFields();
+        RefreshCatalogCombo();
+        SyncStatusText.Text = ProjectSyncService.StatusSummary();
+    }
+
+    private void RefreshCatalogCombo()
+    {
+        var hubId = ProjectStore.Current.Info.HubProjectId?.Trim() ?? "";
+        CatalogBindBox.Items.Clear();
+        ComboBoxItem? selected = null;
+        foreach (var c in ConnectCatalog.List())
+        {
+            if (string.IsNullOrWhiteSpace(c.Id)) continue;
+            var label = string.IsNullOrWhiteSpace(c.Title)
+                ? (string.IsNullOrWhiteSpace(c.Ref) ? c.Id : $"{c.Ref} · {c.Id[..Math.Min(8, c.Id.Length)]}")
+                : $"{c.Title} · {c.Ref}";
+            var item = new ComboBoxItem { Content = label, Tag = c };
+            CatalogBindBox.Items.Add(item);
+            if (string.Equals(c.Id, hubId, StringComparison.OrdinalIgnoreCase))
+                selected = item;
+        }
+        CatalogBindBox.SelectedItem = selected ?? CatalogBindBox.Items.FirstOrDefault();
+        if (CatalogBindBox.Items.Count == 0)
+            CatalogBindBox.PlaceholderText = "No Connect catalog — open AORMS Connect";
+    }
+
+    private void RefreshCatalog_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshCatalogCombo();
+        SyncStatusText.Text = ProjectSyncService.StatusSummary();
+        AppNotify.Info("Catalog", $"{CatalogBindBox.Items.Count} project(s) in Connect catalog.");
+    }
+
+    private void BindCatalog_Click(object sender, RoutedEventArgs e)
+    {
+        if (CatalogBindBox.SelectedItem is not ComboBoxItem { Tag: CatalogProject c })
+        {
+            AppNotify.Warning("Bind", "Select a Connect catalog project first.");
+            return;
+        }
+        try
+        {
+            var msg = ProjectSyncService.Bind(c);
+            HubProjectIdBox.Text = c.Id;
+            ProjectNameBox.Text = ProjectStore.Current.Info.Name;
+            SyncStatusText.Text = ProjectSyncService.StatusSummary();
+            AppNotify.Success("Bound", msg);
+        }
+        catch (Exception ex)
+        {
+            AppNotify.Error("Bind failed", ex.Message);
+        }
     }
 
     private void LoadPersonaFields()
@@ -257,6 +310,7 @@ public sealed partial class SettingsPage : Page
         info.Cin = (CinBox.Text ?? "").Trim();
         info.Pan = (PanBox.Text ?? "").Trim();
         info.LogoPath = _pendingLogoPath ?? "";
+        info.HubProjectId = (HubProjectIdBox.Text ?? "").Trim();
         store.Name = info.Name;
         SavePersonaFields();
 

@@ -2,63 +2,67 @@
     x:Class="BBSApp.Views.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="Transparent">
+    Background="{StaticResource HcwFogBrush}">
     <ScrollViewer>
-        <StackPanel Spacing="20"
-                    MaxWidth="760"
+        <StackPanel Spacing="16"
+                    MaxWidth="960"
                     Padding="{StaticResource PagePadding}"
                     Transitions="{StaticResource PageContentTransitions}">
 
-            <!-- Brand block — H1 -->
-            <Grid ColumnSpacing="14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Border Width="56" Height="56" CornerRadius="6"
-                        Background="White"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        VerticalAlignment="Top">
-                    <Image Source="ms-appx:///Assets/logo.png" Stretch="Uniform" Margin="5"
-                           AutomationProperties.Name="AQC-Core logo"/>
+            <!-- Soft brief — brand -->
+            <Grid>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="16">
+                    <Grid ColumnSpacing="14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="56" Height="56" CornerRadius="8"
+                                Background="{StaticResource HcwWhiteBrush}"
+                                VerticalAlignment="Top">
+                            <Image Source="ms-appx:///Assets/logo.png" Stretch="Uniform" Margin="5"
+                                   AutomationProperties.Name="AQC Core logo"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock x:Name="BrandNameText" Style="{StaticResource PageTitleStyle}"/>
+                            <TextBlock x:Name="BrandFullText" Style="{StaticResource PageSubtitleStyle}"/>
+                            <TextBlock x:Name="BrandTaglineText" Style="{StaticResource CaptionSecondaryStyle}"/>
+                            <TextBlock x:Name="BrandByText" Style="{StaticResource MetaTextStyle}"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
-                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                    <TextBlock Text="AQC-Core" Style="{StaticResource PageTitleStyle}"/>
-                    <TextBlock Text="Accelerated Quantity and Costing Core"
-                               Style="{StaticResource PageSubtitleStyle}"/>
-                    <TextBlock Text="RCC BBS, civil BOQ, shuttering, estimate &amp; PDF drawing takeoff"
-                               Style="{StaticResource CaptionSecondaryStyle}"/>
-                    <TextBlock Text="Developed by Human Centric Works, Hospet"
-                               Style="{StaticResource MetaTextStyle}"
-                               Margin="0,6,0,0"/>
-                </StackPanel>
             </Grid>
 
-            <StackPanel Spacing="4">
-                <TextBlock Text="Current project" Style="{StaticResource SectionHeaderStyle}"/>
-                <TextBlock x:Name="NameText" Style="{StaticResource BodyStrongStyle}" Margin="0"/>
-                <TextBlock x:Name="MetaText" Style="{StaticResource CaptionSecondaryStyle}" TextWrapping="Wrap"/>
-                <TextBlock x:Name="CountsText" Style="{StaticResource CaptionSecondaryStyle}"/>
-            </StackPanel>
+            <Border Style="{StaticResource FluentCardStyle}">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Current project" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    <TextBlock x:Name="NameText" Style="{StaticResource BodyStrongStyle}" Margin="0"/>
+                    <TextBlock x:Name="MetaText" Style="{StaticResource CaptionSecondaryStyle}" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="CountsText" Style="{StaticResource CaptionSecondaryStyle}"/>
+                </StackPanel>
+            </Border>
 
             <StackPanel Spacing="4" Transitions="{StaticResource CardContentTransitions}">
                 <TextBlock Text="Latest steel summary" Style="{StaticResource SectionHeaderStyle}"/>
                 <TextBlock Style="{StaticResource CaptionSecondaryStyle}"
                            Text="Generate on an element page or open Purchase orders for full material totals."/>
-                <Border Style="{StaticResource FluentCardStyle}" Padding="4" Margin="0,2,0,0" MinHeight="160">
+                <Border Style="{StaticResource FluentCardStyle}" Padding="4" Margin="0,2,0,0" MinHeight="180">
                     <Border x:Name="SummaryHost"/>
                 </Border>
             </StackPanel>
 
-            <StackPanel Spacing="4">
-                <TextBlock Text="Drawing takeoff" Style="{StaticResource SectionHeaderStyle}"/>
-                <TextBlock Style="{StaticResource CaptionSecondaryStyle}" TextWrapping="Wrap"
-                           Text="Project → Drawing takeoff: import a PDF, set scale, measure, then Commit to BOQ. Formwork is auto from RCC. Yields and beam–slab deduct are under Settings. Open Quantities for a concrete / formwork / steel preview."/>
-            </StackPanel>
+            <Border Style="{StaticResource FluentCardStyle}">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Drawing takeoff" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    <TextBlock Style="{StaticResource CaptionSecondaryStyle}" TextWrapping="Wrap"
+                               Text="Project → Drawing takeoff: import a PDF, set scale, measure, then Commit to BOQ. Formwork is auto from RCC. Yields and beam–slab deduct are under Settings. Open Quantities for a concrete / formwork / steel preview."/>
+                </StackPanel>
+            </Border>
 
-            <TextBlock Style="{StaticResource MetaTextStyle}"
-                       Text="© Human Centric Works, Hospet"/>
+            <TextBlock x:Name="BrandCopyrightText" Style="{StaticResource MetaTextStyle}"/>
         </StackPanel>
     </ScrollViewer>
 </Page>

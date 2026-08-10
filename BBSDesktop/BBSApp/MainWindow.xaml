@@ -2,160 +2,161 @@
     x:Class="BBSApp.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="AQC-Core">
+    Title="AQC Core">
 
-    <Grid Background="Transparent">
+    <!--
+      Staff geography:
+      Caption (OS drag) — document title only
+      MenuBar row — File · Edit · Help
+      Ribbon 56 — brand once · page · Local AI
+      Stage · ActionDock · Taskbar · Clock
+    -->
+    <Grid Background="{StaticResource HcwFogBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Caption drag region — logo + product name (Fluent title bar) -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="32" Padding="10,0,140,0"
-              Background="Transparent">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Caption — OS drag only (no MenuBar, no second brand name) -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="32" Padding="12,0,140,0"
+              Background="{StaticResource HcwFogBrush}">
             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
                         IsHitTestVisible="False">
-                <Border Width="22" Height="22" CornerRadius="3"
-                        Background="White"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        VerticalAlignment="Center">
-                    <Image Source="ms-appx:///Assets/logo.png"
-                           Stretch="Uniform"
-                           Margin="2"
-                           AutomationProperties.Name="AQC-Core logo"/>
+                <Border Width="16" Height="16" CornerRadius="4"
+                        Background="{StaticResource HcwSoftBrush}">
+                    <Image Source="ms-appx:///Assets/logo.png" Stretch="Uniform" Margin="2"/>
                 </Border>
-                <StackPanel VerticalAlignment="Center" Spacing="0">
-                    <TextBlock x:Name="TitleBarText"
-                               Text="AQC-Core"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
-                    <TextBlock Text="Human Centric Works · Hospet"
-                               FontSize="10"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                </StackPanel>
+                <TextBlock x:Name="TitleBarText" Text="Untitled Project" FontSize="12"
+                           FontFamily="{StaticResource HcwFontFamily}"
+                           Foreground="{StaticResource HcwInkBrush}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" MaxWidth="480"/>
             </StackPanel>
         </Grid>
 
-        <MenuBar Grid.Row="1" Padding="6,0,6,2"
-                 Height="28"
-                 Background="Transparent"
-                 AutomationProperties.Name="Application menu">
-            <MenuBarItem Title="File" AccessKey="F">
-                <MenuFlyoutItem Text="New project" Click="New_Click" AccessKey="N"/>
-                <MenuFlyoutItem Text="Open…" Click="Open_Click" AccessKey="O"/>
-                <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Save" Click="Save_Click" AccessKey="S"/>
-                <MenuFlyoutItem Text="Save as…" Click="SaveAs_Click"/>
-                <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Project settings…" Click="NavMenu_Click" Tag="settings_project"/>
-                <MenuFlyoutItem Text="Engineering settings…" Click="NavMenu_Click" Tag="settings_engineering"/>
-                <MenuFlyoutItem Text="Cost percentages…" Click="NavMenu_Click" Tag="settings_cost"/>
-                <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Exit" Click="Exit_Click" AccessKey="X"/>
-            </MenuBarItem>
-            <MenuBarItem Title="View" AccessKey="V">
-                <MenuFlyoutItem Text="Dashboard" Click="NavMenu_Click" Tag="dashboard"/>
-                <MenuFlyoutItem Text="Levels" Click="NavMenu_Click" Tag="levels"/>
-                <MenuFlyoutItem Text="Drawing takeoff" Click="NavMenu_Click" Tag="takeoff"/>
-                <MenuFlyoutItem Text="Columns" Click="NavMenu_Click" Tag="columns"/>
-                <MenuFlyoutItem Text="Beams" Click="NavMenu_Click" Tag="beams"/>
-                <MenuFlyoutItem Text="Slabs" Click="NavMenu_Click" Tag="slabs"/>
-                <MenuFlyoutItem Text="Footings" Click="NavMenu_Click" Tag="footings"/>
-                <MenuFlyoutItem Text="Retaining walls" Click="NavMenu_Click" Tag="walls"/>
-                <MenuFlyoutItem Text="Stairs" Click="NavMenu_Click" Tag="stairs"/>
-                <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Masonry walls" Click="NavMenu_Click" Tag="masonry"/>
-                <MenuFlyoutItem Text="Plastering" Click="NavMenu_Click" Tag="plaster"/>
-                <MenuFlyoutItem Text="PCC bed" Click="NavMenu_Click" Tag="pcc"/>
-                <MenuFlyoutItem Text="Earthwork" Click="NavMenu_Click" Tag="earthwork"/>
-                <MenuFlyoutItem Text="Size stone masonry" Click="NavMenu_Click" Tag="ssm"/>
-                <MenuFlyoutItem Text="Shuttering" Click="NavMenu_Click" Tag="shuttering"/>
-                <MenuFlyoutItem Text="Flooring" Click="NavMenu_Click" Tag="flooring"/>
-                <MenuFlyoutItem Text="Painting" Click="NavMenu_Click" Tag="painting"/>
-                <MenuFlyoutItem Text="Doors" Click="NavMenu_Click" Tag="doors"/>
-                <MenuFlyoutItem Text="Windows" Click="NavMenu_Click" Tag="windows"/>
-                <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Purchase orders" Click="NavMenu_Click" Tag="po"/>
-                <MenuFlyoutItem Text="Estimate" Click="NavMenu_Click" Tag="estimate"/>
-                <MenuFlyoutItem Text="Rate book" Click="NavMenu_Click" Tag="ratebook"/>
-                <MenuFlyoutItem Text="Quantities preview" Click="NavMenu_Click" Tag="quantities"/>
-                <MenuFlyoutItem Text="Report" Click="NavMenu_Click" Tag="report"/>
-            </MenuBarItem>
-            <MenuBarItem Title="Help" AccessKey="H">
-                <MenuFlyoutItem Text="About AQC-Core" Click="About_Click"/>
-            </MenuBarItem>
-        </MenuBar>
+        <!-- Shell at 0.96× — layout size compensated in ScaleViewport_SizeChanged -->
+        <Grid x:Name="ScaleViewport" Grid.Row="1" SizeChanged="ScaleViewport_SizeChanged"
+              Background="{StaticResource HcwFogBrush}">
+            <Grid x:Name="ScaleHost" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  RenderTransformOrigin="0,0">
+                <Grid.RenderTransform>
+                    <ScaleTransform x:Name="UiScaleTransform" ScaleX="0.96" ScaleY="0.96"/>
+                </Grid.RenderTransform>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-        <!-- Ribbon — tabs stay fixed; command strip always visible and merged with active tab -->
-        <Border x:Name="RibbonChrome" Grid.Row="2"
-                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="8,6,12,8">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <!-- MenuBar row — proper dedicated strip (not title bar) -->
+        <Border Grid.Row="0" Margin="16,8,16,0" Padding="8,0" Height="36"
+                Background="{StaticResource HcwWhiteBrush}"
+                BorderBrush="{StaticResource HcwEdgeBrush}"
+                BorderThickness="1" CornerRadius="8"
+                AutomationProperties.Name="Menu bar">
+            <MenuBar x:Name="AppMenuBar" Height="32" VerticalAlignment="Center"
+                     Background="Transparent"
+                     Foreground="{StaticResource HcwInkBrush}">
+                <MenuBarItem Title="File" AccessKey="F">
+                    <MenuFlyoutItem Text="New project" Click="New_Click" AccessKey="N"/>
+                    <MenuFlyoutItem Text="Open…" Click="Open_Click" AccessKey="O"/>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Save" Click="Save_Click" AccessKey="S"/>
+                    <MenuFlyoutItem Text="Save as…" Click="SaveAs_Click"/>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Exit" Click="Exit_Click" AccessKey="X"/>
+                </MenuBarItem>
+                <MenuBarItem Title="Edit" AccessKey="E">
+                    <MenuFlyoutItem Text="Project settings…" Click="NavMenu_Click" Tag="settings_project"/>
+                    <MenuFlyoutItem Text="Engineering settings…" Click="NavMenu_Click" Tag="settings_engineering"/>
+                    <MenuFlyoutItem Text="Cost percentages…" Click="NavMenu_Click" Tag="settings_cost"/>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Bind from Connect…" Click="BindProject_Click"/>
+                </MenuBarItem>
+                <MenuBarItem Title="Help" AccessKey="H">
+                    <MenuFlyoutItem Text="About…" Click="About_Click"/>
+                </MenuBarItem>
+            </MenuBar>
+        </Border>
 
-                <Grid Margin="0,0,0,-1" Canvas.ZIndex="1">
+        <!-- TOP RIBBON 56 — brand once · page · Local AI -->
+        <Grid Grid.Row="1" Height="56" Margin="16,8,16,8">
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}">
+                <Grid Padding="16,0" Height="56">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <ScrollViewer HorizontalScrollMode="Enabled"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="RibbonTabPanel" Orientation="Horizontal" Spacing="0"/>
-                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Border Width="32" Height="32" CornerRadius="8"
+                                Background="{StaticResource HcwWhiteBrush}">
+                            <Image Source="ms-appx:///Assets/logo.png" Stretch="Uniform" Margin="4"
+                                   AutomationProperties.Name="Product logo"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="0">
+                            <TextBlock x:Name="BrandTitleText" Text="AQC Core"
+                                       FontSize="16" FontWeight="SemiBold"
+                                       FontFamily="{StaticResource HcwFontFamily}"
+                                       Foreground="{StaticResource HcwInkBrush}"/>
+                            <TextBlock x:Name="BrandSubText" Text="Accelerated Quantity and Costing"
+                                       FontSize="11" Foreground="{StaticResource HcwMutedBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                                VerticalAlignment="Center" Margin="12,0,0,0">
-                        <Border x:Name="PersonaBadge" Padding="8,2,8,2" CornerRadius="4"
-                                VerticalAlignment="Center"
-                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                ToolTipService.ToolTip="Active persona — change under File → Project settings">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE77B;" FontSize="12" VerticalAlignment="Center"
-                                          FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock x:Name="PersonaBadgeText" VerticalAlignment="Center"
-                                           Style="{StaticResource CaptionSecondaryStyle}"/>
-                            </StackPanel>
-                        </Border>
-                        <TextBlock x:Name="RibbonPageLabel"
-                                   VerticalAlignment="Center" Margin="6,0,0,0"
-                                   Style="{StaticResource CaptionSecondaryStyle}"/>
+                                VerticalAlignment="Center" Margin="24,0" HorizontalAlignment="Left">
+                        <TextBlock x:Name="PersonaBadgeText" FontSize="12"
+                                   Foreground="{StaticResource HcwMutedBrush}"
+                                   VerticalAlignment="Center"
+                                   ToolTipService.ToolTip="Active persona — Edit → Project settings"/>
+                        <TextBlock x:Name="PersonaPageSep" Text="·"
+                                   Foreground="{StaticResource HcwMutedBrush}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="RibbonPageLabel" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   VerticalAlignment="Center"
+                                   Text="Dashboard"/>
                     </StackPanel>
+
+                    <Grid Grid.Column="2" Height="35" VerticalAlignment="Center">
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="3,3,0,0"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,3,3"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="10,0">
+                            <TextBlock Text="Local AI · desktop" VerticalAlignment="Center"
+                                       FontSize="12" Foreground="{StaticResource HcwMutedBrush}"/>
+                        </Border>
+                    </Grid>
                 </Grid>
+            </Border>
+        </Grid>
 
-                <Border x:Name="RibbonBody" Grid.Row="1"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="0,4,4,4"
-                        Padding="6,8,6,6">
-                    <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="RibbonCommandPanel" Orientation="Horizontal" Spacing="2"/>
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-        </Border>
+        <!-- STAGE — progressive command strip (current pillar only) + work -->
+        <Grid Grid.Row="2" Background="{StaticResource HcwFogBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="3">
-            <Frame x:Name="ContentFrame">
+            <!-- Flat Layer-1 strip — only commands for the active taskbar pillar -->
+            <Border Grid.Row="0" Margin="24,0,24,8" Padding="8,6"
+                    Background="{StaticResource HcwWhiteBrush}"
+                    BorderBrush="{StaticResource HcwEdgeBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    x:Name="RibbonBody">
+                <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="RibbonCommandPanel" Orientation="Horizontal" Spacing="4"/>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Hidden host kept for BuildRibbonTabs API (pillars live in taskbar) -->
+            <StackPanel x:Name="RibbonTabPanel" Visibility="Collapsed"/>
+
+            <Grid Grid.Row="1">
+            <Frame x:Name="ContentFrame" Margin="24,0,24,168">
                 <Frame.ContentTransitions>
                     <TransitionCollection>
                         <NavigationThemeTransition/>
@@ -163,128 +164,229 @@
                 </Frame.ContentTransitions>
             </Frame>
 
-            <!-- Fluent toast — bottom-right, acrylic tint, theme text -->
-            <Border x:Name="ToastHost"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Margin="16,16,16,72"
-                    MaxWidth="400"
-                    MinWidth="280"
-                    Visibility="Collapsed"
-                    Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="{ThemeResource OverlayCornerRadius}"
-                    Translation="0,0,32"
-                    Canvas.ZIndex="200"
-                    AutomationProperties.Name="Notification">
-                <Border.Shadow>
-                    <ThemeShadow/>
-                </Border.Shadow>
-                <InfoBar x:Name="ToastBar"
-                         IsOpen="False"
-                         IsClosable="True"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         CloseButtonClick="ToastBar_CloseClick">
-                    <InfoBar.Resources>
-                        <SolidColorBrush x:Key="InfoBarInformationalSeverityBackgroundBrush" Color="Transparent"/>
-                        <SolidColorBrush x:Key="InfoBarSuccessSeverityBackgroundBrush" Color="Transparent"/>
-                        <SolidColorBrush x:Key="InfoBarWarningSeverityBackgroundBrush" Color="Transparent"/>
-                        <SolidColorBrush x:Key="InfoBarErrorSeverityBackgroundBrush" Color="Transparent"/>
-                    </InfoBar.Resources>
-                </InfoBar>
-            </Border>
+            <!-- ActionDock — LEFT New · CENTER Save · RIGHT Publish (≤3; sync tools in taskbar) -->
+            <Grid x:Name="DockChrome"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Bottom"
+                  Margin="16,0,16,84"
+                  Canvas.ZIndex="50">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="5,5,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,5,5"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="New" Style="{StaticResource HcwDockButton}"
+                                Click="New_Click"
+                                ToolTipService.ToolTip="New project"/>
+                        <Button Content="Save" Style="{StaticResource HcwDockPrimary}"
+                                Click="Save_Click" MinWidth="88"
+                                ToolTipService.ToolTip="Save project (Ctrl+S)"/>
+                        <Button Content="Publish" Style="{StaticResource HcwDockButton}"
+                                Click="PublishStatus_Click"
+                                ToolTipService.ToolTip="Publish project status to hub"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
-            <!-- Floating calculator: panel above FAB, bottom-right -->
-            <StackPanel HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Margin="0,0,16,16"
-                        Spacing="8"
-                        Canvas.ZIndex="100">
-                <Border x:Name="FloatingCalcPanel"
-                        Width="320"
-                        Padding="10"
-                        Visibility="Collapsed"
-                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource RadiusXLarge}"
-                        Translation="0,0,32"
-                        HorizontalAlignment="Right"
-                        AutomationProperties.Name="Floating calculator">
-                    <Border.Shadow>
-                        <ThemeShadow/>
-                    </Border.Shadow>
-                    <StackPanel Spacing="6">
+            <!-- Taskbar 60 — L tools · C pillars · R sync -->
+            <Grid x:Name="TaskbarChrome" VerticalAlignment="Bottom" Height="60"
+                  Margin="16,0,16,16" Canvas.ZIndex="40">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="12,0">
+                    <Grid Height="60">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <Button x:Name="NavCalcBtn" Style="{StaticResource HcwGhostButton}" MinWidth="40"
+                                    Click="CalcFab_Click" ToolTipService.ToolTip="Calculator · Ask">
+                                <FontIcon Glyph="&#xE1D0;" FontSize="16"
+                                          FontFamily="{ThemeResource SymbolThemeFontFamily}"/>
+                            </Button>
+                        </StackPanel>
+                        <ScrollViewer Grid.Column="1" HorizontalScrollMode="Enabled"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled"
+                                      HorizontalAlignment="Stretch">
+                            <StackPanel x:Name="TaskbarPillarPanel" Orientation="Horizontal" Spacing="2"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </ScrollViewer>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <Button Content="Bind" Style="{StaticResource HcwGhostButton}"
+                                    Click="BindProject_Click"
+                                    ToolTipService.ToolTip="Bind to AORMS Connect catalog"/>
+                            <Button x:Name="DockFlushBtn" Content="Flush" Style="{StaticResource HcwGhostButton}"
+                                    Click="Flush_Click"
+                                    ToolTipService.ToolTip="Flush outbox to hub"/>
+                            <Border x:Name="SyncBadge" Padding="10,0" Height="35" CornerRadius="8"
+                                    Background="{StaticResource HcwFogBrush}"
+                                    Tapped="SyncBadge_Tapped"
+                                    ToolTipService.ToolTip="Hub sync status — tap for project settings">
+                                <TextBlock x:Name="SyncBadgeText" VerticalAlignment="Center"
+                                           FontSize="12" Foreground="{StaticResource HcwInkBrush}"
+                                           MaxWidth="140" TextTrimming="CharacterEllipsis"
+                                           Text="Sync…"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Soft toast — clears taskbar + clock -->
+            <Grid x:Name="ToastHost"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="16,16,140,92"
+                  MaxWidth="400" MinWidth="280"
+                  Visibility="Collapsed"
+                  Canvas.ZIndex="200"
+                  AutomationProperties.Name="Notification">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="4,4,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,4,4"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="4">
+                    <InfoBar x:Name="ToastBar"
+                             IsOpen="False" IsClosable="True"
+                             Background="Transparent" BorderThickness="0"
+                             CloseButtonClick="ToastBar_CloseClick">
+                        <InfoBar.Resources>
+                            <SolidColorBrush x:Key="InfoBarInformationalSeverityBackgroundBrush" Color="Transparent"/>
+                            <SolidColorBrush x:Key="InfoBarSuccessSeverityBackgroundBrush" Color="Transparent"/>
+                            <SolidColorBrush x:Key="InfoBarWarningSeverityBackgroundBrush" Color="Transparent"/>
+                            <SolidColorBrush x:Key="InfoBarErrorSeverityBackgroundBrush" Color="Transparent"/>
+                        </InfoBar.Resources>
+                    </InfoBar>
+                </Border>
+            </Grid>
+
+            <!-- Calculator panel — left of clock, above taskbar -->
+            <Grid x:Name="FloatingCalcPanel"
+                  Width="320"
+                  Visibility="Collapsed"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,140,92"
+                  Canvas.ZIndex="100"
+                  AutomationProperties.Name="Floating calculator">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="5,5,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,5,5"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="12">
+                    <StackPanel Spacing="8">
                         <Grid>
                             <TextBlock Text="Calculator · Ask"
-                                       FontSize="12" FontWeight="SemiBold"
+                                       FontSize="13" FontWeight="SemiBold"
+                                       FontFamily="{StaticResource HcwFontFamily}"
+                                       Foreground="{StaticResource HcwInkBrush}"
                                        VerticalAlignment="Center"/>
                             <Button HorizontalAlignment="Right"
-                                    Padding="4" MinWidth="28" MinHeight="28"
+                                    Style="{StaticResource HcwGhostButton}"
+                                    MinWidth="35" Width="35" Padding="0"
                                     Click="CalcClose_Click"
-                                    ToolTipService.ToolTip="Close"
-                                    AutomationProperties.Name="Close calculator">
-                                <FontIcon Glyph="&#xE711;" FontSize="11"
-                                          FontFamily="{ThemeResource SymbolThemeFontFamily}"/>
+                                    ToolTipService.ToolTip="Close">
+                                <FontIcon Glyph="&#xE711;" FontSize="12"
+                                          FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                          Foreground="{StaticResource HcwMutedBrush}"/>
                             </Button>
                         </Grid>
                         <TextBox x:Name="CalcInput"
                                  PlaceholderText="Calculate or ask a question"
-                                 FontSize="12"
-                                 MinHeight="26"
-                                 AcceptsReturn="False"
-                                 TextWrapping="NoWrap"
+                                 FontSize="13" MinHeight="35"
+                                 AcceptsReturn="False" TextWrapping="NoWrap"
                                  KeyDown="CalcInput_KeyDown"
-                                 TextChanged="CalcInput_TextChanged"
-                                 AutomationProperties.Name="Calculator input"/>
+                                 TextChanged="CalcInput_TextChanged"/>
                         <TextBox x:Name="CalcResult"
                                  PlaceholderText="Result"
-                                 FontSize="12"
-                                 MinHeight="26"
-                                 IsReadOnly="True"
-                                 AcceptsReturn="False"
-                                 TextWrapping="NoWrap"
-                                 IsTabStop="True"
-                                 AutomationProperties.Name="Calculator result"/>
+                                 FontSize="13" MinHeight="35"
+                                 IsReadOnly="True" AcceptsReturn="False"
+                                 Foreground="{StaticResource HcwAccentBrush}"/>
                         <Grid x:Name="AssistantReplyHost" Visibility="Collapsed">
-                            <ScrollViewer MaxHeight="240"
-                                          VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollMode="Disabled">
-                                <TextBlock x:Name="AssistantReply"
-                                           FontSize="12"
-                                           TextWrapping="Wrap"
-                                           IsTextSelectionEnabled="True"
-                                           AutomationProperties.Name="Assistant reply"/>
+                            <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto">
+                                <TextBlock x:Name="AssistantReply" FontSize="12" TextWrapping="Wrap"
+                                           Foreground="{StaticResource HcwInkBrush}"
+                                           IsTextSelectionEnabled="True"/>
                             </ScrollViewer>
-                            <ProgressRing x:Name="AssistantBusy"
-                                          IsActive="False"
-                                          Visibility="Collapsed"
-                                          Width="20" Height="20"
-                                          VerticalAlignment="Top"
-                                          HorizontalAlignment="Center"
-                                          Margin="0,4,0,0"/>
+                            <ProgressRing x:Name="AssistantBusy" IsActive="False" Visibility="Collapsed"
+                                          Width="20" Height="20" HorizontalAlignment="Center"/>
                         </Grid>
-                        <TextBlock FontSize="9"
-                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        <TextBlock FontSize="11" Foreground="{StaticResource HcwMutedBrush}"
                                    Text="Enter to run · Esc to clear"/>
                     </StackPanel>
                 </Border>
+            </Grid>
 
-                <Button x:Name="CalcFab"
-                        Width="44" Height="44"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        CornerRadius="22"
-                        Style="{StaticResource AccentButtonStyle}"
-                        Click="CalcFab_Click"
-                        ToolTipService.ToolTip="Calculator"
-                        AutomationProperties.Name="Open calculator">
-                    <FontIcon Glyph="&#xE8EF;" FontSize="16"
-                              FontFamily="{ThemeResource SymbolThemeFontFamily}"/>
+            <!-- Hidden FAB peer — code still references CalcFab for focus -->
+            <Button x:Name="CalcFab" Visibility="Collapsed" Click="CalcFab_Click"/>
+
+            <!-- Analogue clock + Pomodoro — design 100/127; shell ScaleHost 0.8× → face ~80 -->
+            <StackPanel x:Name="ClockPomodoroHost"
+                        VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                        Margin="0,0,16,92" Spacing="4" IsHitTestVisible="True"
+                        Canvas.ZIndex="20"
+                        AutomationProperties.Name="Clock and Pomodoro">
+                <Viewbox Width="127" Height="127" Stretch="Uniform" HorizontalAlignment="Center">
+                    <Grid x:Name="PomodoroDial" Width="127" Height="127"
+                          ToolTipService.ToolTip="Pomodoro — click start/pause · double-click reset · drag orange crown to set">
+                        <Ellipse x:Name="PomodoroHitPlate" Width="127" Height="127"
+                                 Fill="#01F2F4F7" Stroke="Transparent"
+                                 Tapped="Pomodoro_Tapped" DoubleTapped="Pomodoro_DoubleTapped"/>
+                        <Grid Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center"
+                              IsHitTestVisible="False">
+                            <Ellipse Fill="{StaticResource HcwNeuDarkBrush}" Margin="5,5,0,0"/>
+                            <Ellipse Fill="{StaticResource HcwNeuLightBrush}" Margin="0,0,5,5"/>
+                            <Border x:Name="ClockFace" Width="100" Height="100" CornerRadius="50"
+                                    Background="{StaticResource HcwSoftBrush}" BorderThickness="0">
+                                <Grid>
+                                    <Canvas Width="100" Height="100">
+                                        <Line x:Name="ClockHour" X1="50" Y1="50" X2="50" Y2="28"
+                                              Stroke="{StaticResource HcwInkBrush}" StrokeThickness="3" StrokeLineJoin="Round"/>
+                                        <Line x:Name="ClockMinute" X1="50" Y1="50" X2="50" Y2="18"
+                                              Stroke="{StaticResource HcwInkBrush}" StrokeThickness="2"/>
+                                        <Line x:Name="ClockSecond" X1="50" Y1="50" X2="50" Y2="14"
+                                              Stroke="{StaticResource HcwAccentBrush}" StrokeThickness="1"/>
+                                    </Canvas>
+                                    <Image Source="ms-appx:///Assets/logo.png" Width="14" Height="14"
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <Ellipse Width="116" Height="116" Stroke="#FFD4C4" StrokeThickness="2.4"
+                                 Fill="Transparent" IsHitTestVisible="False"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Path x:Name="PomodoroArc" Width="127" Height="127" Stretch="None"
+                              Stroke="{StaticResource HcwAccentBrush}"
+                              StrokeThickness="2.4" StrokeLineJoin="Round" StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" IsHitTestVisible="False"/>
+                        <Canvas x:Name="PomodoroCanvas" Width="127" Height="127" IsHitTestVisible="True">
+                            <Line x:Name="PomodoroArm" X1="63.5" Y1="63.5" X2="63.5" Y2="8"
+                                  Stroke="{StaticResource HcwAccentBrush}" StrokeThickness="1.2"
+                                  Opacity="0.9" IsHitTestVisible="False"/>
+                            <Ellipse x:Name="PomodoroCrownHit" Width="28" Height="28"
+                                     Fill="#01FFFFFF" Canvas.Left="49.5" Canvas.Top="-5"
+                                     PointerPressed="PomodoroCrown_PointerPressed"
+                                     PointerMoved="PomodoroCrown_PointerMoved"
+                                     PointerReleased="PomodoroCrown_PointerReleased"
+                                     PointerCaptureLost="PomodoroCrown_PointerReleased"/>
+                            <Ellipse x:Name="PomodoroCrown" Width="10" Height="10"
+                                     Fill="{StaticResource HcwAccentBrush}" Stroke="White" StrokeThickness="1"
+                                     Canvas.Left="58.5" Canvas.Top="3" IsHitTestVisible="False"/>
+                        </Canvas>
+                    </Grid>
+                </Viewbox>
+                <Button x:Name="PomodoroToggleBtn" Style="{StaticResource HcwGhostButton}"
+                        Height="28" MinHeight="28" MaxHeight="28" Padding="8,0"
+                        HorizontalAlignment="Center" Click="PomodoroToggle_Click"
+                        ToolTipService.ToolTip="Start / pause Pomodoro">
+                    <TextBlock x:Name="PomodoroLabel" Text="25:00 · Pomodoro"
+                               FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource HcwMutedBrush}"/>
                 </Button>
             </StackPanel>
-        </Grid>
-    </Grid>
+            </Grid><!-- work -->
+            </Grid><!-- stage -->
+                </Grid><!-- scale inner -->
+            </Grid><!-- ScaleHost -->
+        </Grid><!-- ScaleViewport -->
+    </Grid><!-- root -->
 </Window>

@@ -21,6 +21,9 @@ public static class AormsBridgeHost
             DeviceId = Environment.GetEnvironmentVariable("INSTALL_ID")
                 ?? $"aqc-{Environment.MachineName}".ToLowerInvariant(),
         };
-        return new AormsBridge(opt);
+        var bridge = new AormsBridge(opt);
+        // Connect-first: pull session.json syncToken into firm.db when present.
+        bridge.TryImportConnectSession(overwrite: true);
+        return bridge;
     }
 }

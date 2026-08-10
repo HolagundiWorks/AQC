@@ -5,15 +5,15 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>BBSApp</RootNamespace>
     <AssemblyName>AQCCore</AssemblyName>
-    <ApplicationTitle>AQC-Core</ApplicationTitle>
+    <ApplicationTitle>AQC Core</ApplicationTitle>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <Version>1.1.0</Version>
     <Company>Human Centric Works</Company>
-    <Product>AQC-Core</Product>
+    <Product>AQC Core</Product>
     <Authors>Human Centric Works, Hospet</Authors>
-    <Description>AQC-Core (Accelerated Quantity and Costing Core) â€” quantity take-off and costing for RCC, masonry, plaster, PCC and earthwork by Human Centric Works, Hospet.</Description>
-    <Copyright>Copyright Â© 2026 Human Centric Works, Hospet</Copyright>
+    <Description>AQC Core — Accelerated Quantity and Costing (AORMS technical). Estimation, BBS, BOQ — local engine by Human Centric Works, Hospet.</Description>
+    <Copyright>Copyright © 2026 Human Centric Works, Hospet</Copyright>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>

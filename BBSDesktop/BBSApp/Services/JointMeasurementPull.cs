@@ -31,21 +31,13 @@ public static class JointMeasurementPull
 
             var pid = projectId?.Trim();
             if (string.IsNullOrWhiteSpace(pid))
+                pid = ProjectStore.Current.Info.HubProjectId?.Trim();
+            if (string.IsNullOrWhiteSpace(pid))
             {
-                var hubId = ProjectStore.Current.Info.HubProjectId?.Trim();
-                if (!string.IsNullOrWhiteSpace(hubId))
-                    pid = hubId;
-                else
+                return new Result
                 {
-                    var first = ConnectCatalog.List().FirstOrDefault();
-                    if (first is null)
-                        return new Result { Error = "No Connect catalog project. Bind a project or set Hub project id in Settings." };
-                    pid = first.Id;
-                    ProjectStore.Current.Info.HubProjectId = pid;
-                    if (string.IsNullOrWhiteSpace(ProjectStore.Current.Info.Name) ||
-                        ProjectStore.Current.Info.Name == "Untitled Project")
-                        ProjectStore.Current.Info.Name = first.Title;
-                }
+                    Error = "Bind a Connect project first (ActionDock › Bind or Settings › Project › Hub project id)."
+                };
             }
 
             var bundles = await bridge.PullJointMeasurementsAsync(pid, ct).ConfigureAwait(true);

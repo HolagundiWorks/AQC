@@ -15,6 +15,11 @@ public sealed partial class DashboardPage : Page
     public DashboardPage()
     {
         InitializeComponent();
+        BrandNameText.Text = Branding.AppName;
+        BrandFullText.Text = $"{Branding.FullName} · {Branding.SuiteLine}";
+        BrandTaglineText.Text = Branding.Tagline;
+        BrandByText.Text = Branding.DevelopedBy;
+        BrandCopyrightText.Text = Branding.Copyright;
         _summaryTable.SetAutomationName("Latest steel summary");
         SummaryHost.Child = _summaryTable;
         Loaded += OnLoaded;

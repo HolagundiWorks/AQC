@@ -44,6 +44,37 @@
                         </StackPanel>
 
                         <StackPanel Spacing="4">
+                            <TextBlock Text="AORMS Connect · hub sync" Style="{StaticResource SectionHeaderStyle}"/>
+                            <Border Style="{StaticResource FluentCardStyle}">
+                                <StackPanel Spacing="{StaticResource SpacingS}">
+                                    <TextBlock x:Name="SyncStatusText"
+                                               Style="{StaticResource CaptionSecondaryStyle}"
+                                               TextWrapping="Wrap"
+                                               Text="Sync status…"/>
+                                    <ComboBox x:Name="CatalogBindBox"
+                                              Header="Connect catalog project"
+                                              MinWidth="280"
+                                              HorizontalAlignment="Stretch"
+                                              AutomationProperties.Name="Connect catalog project"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Content="Bind selected" Click="BindCatalog_Click"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                AutomationProperties.Name="Bind selected Connect project"/>
+                                        <Button Content="Refresh catalog" Click="RefreshCatalog_Click"
+                                                AutomationProperties.Name="Refresh Connect catalog"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="HubProjectIdBox"
+                                             Header="Hub project id"
+                                             PlaceholderText="UUID from AORMS Connect"
+                                             AutomationProperties.Name="Hub project id"/>
+                                    <TextBlock Style="{StaticResource CaptionSecondaryStyle}"
+                                               TextWrapping="Wrap"
+                                               Text="Shared project UUID for Flush, publish status / estimate totals, and Pull JM. Catalog: %LocalAppData%\AORMS-Connect\catalog.json — Activate in Connect first."/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
                             <TextBlock Text="Prepared by" Style="{StaticResource SectionHeaderStyle}"/>
                             <Border Style="{StaticResource FluentCardStyle}">
                                 <StackPanel Spacing="{StaticResource SpacingS}">
