@@ -15,7 +15,7 @@ var opt = new BridgeOptions
 using var bridge = new AormsBridge(opt);
 bridge.TryImportConnectSession(overwrite: true);
 var cfg = bridge.HubConfigured();
-Console.WriteLine($"syncReady={cfg.SyncReady} hub={cfg.HubUrl}");
+Console.WriteLine($"syncReady={cfg.SyncReady} hub={cfg.HubUrl} (licence from AORMS Connect session.json)");
 
 if (args.Length >= 1 && string.Equals(args[0], "pull-jm", StringComparison.OrdinalIgnoreCase))
 {

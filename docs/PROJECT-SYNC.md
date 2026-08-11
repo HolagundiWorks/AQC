@@ -25,7 +25,8 @@
 ## Prerequisites
 
 1. **AORMS Connect** Activate (writes `%LocalAppData%\AORMS-Connect\session.json` + `catalog.json`).
-2. Bind the open `.bbsproj` to a catalog project (shared UUID).
-3. Optional env overrides: `ESTI_HUB_URL`, `ESTI_LICENSE_API_URL`, `INSTALL_ID`.
+2. AQC Core / Estimation / BBS / PM import licence via `TryImportConnectSession` (no HLP Activate UI in AQC).
+3. Bind the open `.bbsproj` to a catalog project (shared UUID).
+4. Optional env overrides: `ESTI_HUB_URL`, `ESTI_LICENSE_API_URL`, `INSTALL_ID`.
 
-Firm DB: `%LocalAppData%\AQCCore\firm.db` (tokens + outbox). Bridge: `BBSDesktop/Aorms.Bridge`.
+Firm DB: `%LocalAppData%\AQCCore\firm.db` (tokens + outbox from Connect session). Bridge: `BBSDesktop/Aorms.Bridge`.

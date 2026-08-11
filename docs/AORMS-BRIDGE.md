@@ -84,7 +84,8 @@ AQC, then AStudio / AConsulting.
 
 | API surface | Hub call | Notes |
 | --- | --- | --- |
-| `Activate(licenseKey)` | `POST /platform/v1/activate` | Persist `licenseToken` + **`syncToken`** |
+| `Activate(licenseKey)` | `POST /platform/v1/activate` | **Connect only** — persist tokens + write `session.json` |
+| `TryImportConnectSession` | local file | Suite apps import Connect `session.json` into `firm.db` |
 | `Refresh()` | `POST /platform/v1/refresh` | Persist `syncToken` if minted |
 | `EnqueueMeta(event)` | local outbox | No network |
 | `EnqueueArtifact(entity, bytes, dto)` | local outbox | Content-hash skip |
