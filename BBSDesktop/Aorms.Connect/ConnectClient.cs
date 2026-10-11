@@ -199,11 +199,15 @@ public sealed class ConnectClient : IDisposable
             };
             req.Headers.Add("apikey", cfg.SupabaseAnonKey);
             using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+            // Only a refused refresh token ends the sign-in. A busy/failing auth server (5xx, 429) must not sign anyone out:
+            // the caller keeps its work and tries again later.
+            if (!res.IsSuccessStatusCode && ((int)res.StatusCode >= 500 || (int)res.StatusCode == 429 || (int)res.StatusCode == 408))
+                throw new ConnectException((int)res.StatusCode, "unavailable", "AORMS sign-in isn't available right now.");
             if (!res.IsSuccessStatusCode)
             {
                 ClearLocal(keepStore: true);
                 SignedOut?.Invoke();
-                throw new ConnectException((int)res.StatusCode, "invalid_token", "Your sign-in expired. Sign in again.");
+                throw new ConnectException(401, "invalid_token", "Your sign-in expired. Sign in again.");
             }
             using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
             var root = doc.RootElement;

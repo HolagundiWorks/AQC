@@ -15,7 +15,7 @@ Server side + full spec live in the AORMS repo (`HolagundiWorks/aorms`): `docs/e
 | A6 | `RateBooksApi.cs` | shared rate books: list, get, publish (idempotent, duplicate codes refused), activate, and the sign-in merge `Plan` (match on `client_id`; never overwrites silently) |
 | A3 | `ProjectSync.cs` | edit lease (renew 60 s / retry 30 s), persistent `Outbox`, 2 s debounce, 500-row batches, 423 re-acquire, 400 row isolation, offline back-off, `session_replaced` stop, catch-up that asks for review when local changes exist |
 
-Tests: `BBSDesktop/Aorms.Connect.Tests` (59 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
+Tests: `BBSDesktop/Aorms.Connect.Tests` (67 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
 
 ## NOT built / NOT verified (this is the local agent's job)
 
@@ -24,14 +24,14 @@ Tests: `BBSDesktop/Aorms.Connect.Tests` (59 xunit, fake HTTP). Live walkthrough:
 3. **`IOutboxStore` file-backed implementation** not written (only in-memory). Needed so unsent edits survive restarts.
 4. **Home screen** (sign-in first, *Continue without signing in* → Community; Online projects list, then Local; open from seed; *Push online*). Spec §2, §3, §9.
 5. **ProjectStore integration**: call `Outbox.Upsert/Delete` + `NoteChange()` from `ProjectStore.Notify()`; drive `ProjectSync.TickAsync()` from a ~1 s UI timer; mint `_rid` on take-off rows (use `ProjectMapper.ToSync`).
-6. **A7 not started**: (rate books are library-only — mapping to AQC's `RateBookStore` is app work), hardening (offline for days, lease expiry mid-edit, 10k-row project).
+6. **A1–A7 library work is done.** (Rate books are library-only — mapping to AQC's `RateBookStore` is app work.)
 7. Old `Aorms.Bridge`, `Aorms.Bridge.Smoke`, and the Connect/licence code are still in the tree; remove once nothing references them.
 
 ## Run the tests (no AORMS needed)
 
 ```
 cd BBSDesktop
-dotnet test Aorms.Connect.Tests          # expect 59 passed
+dotnet test Aorms.Connect.Tests          # expect 67 passed
 ```
 
 ## Run the live walkthrough
@@ -69,6 +69,15 @@ unlinked account).
 - `POST /versions` answers `{ version: <number> }` (a version number, not a GUID).
 
 - **Certify was not run live** by the smoke (it changes data): set `AORMS_CERTIFY_BILL=<bill id>` with a `cost:approve` account on a throwaway DRAFT bill to exercise certify + the 409 on a second try. Bill backup download is also unexercised (needs storage).
+
+## A7 hardening (what is covered)
+
+- Refresh: a refused refresh token signs out (outbox kept, `SyncState.SignedOut`); a busy auth server (5xx/429) never signs anyone out.
+- Lease lost between batches → rows kept, oldest first, read-only. Dead network → back-off, nothing lost. Restart → outbox replays in original order (collapsed edits and deletes preserved).
+- Big project: first ≤500 rows bind the project, the rest go in ≤500-row batches under the lease; a failed later batch returns the unsent rows in `PushResult.Pending`. `Outbox.UpsertMany` saves once (per-row saves are quadratic).
+- Smoke: `AORMS_BIG=1500` pushes/pulls a synthetic project and a big rate book (binds one more unbound demo project).
+- **Server fix this found (aorms):** PostgREST caps responses at 1000 rows, so pulling >1000 rows silently truncated; fixed server-side in aorms (page = 1000; rate-book items paged). Needs the aorms PR `claude/aqc-page-cap` deployed.
+- **Still only testable on Windows:** a real multi-day offline, token refresh across hours, two writers, Credential Manager.
 
 ## Known server notes
 

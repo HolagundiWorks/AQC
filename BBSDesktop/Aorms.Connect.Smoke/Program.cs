@@ -98,6 +98,31 @@ if (unbound is not null)
 }
 else Console.WriteLine("SKIP push — every project is already bound");
 
+// A7: chunked push of a big synthetic project (AORMS_BIG=<rows>, e.g. 1300). Binds one more unbound project.
+if (int.TryParse(Environment.GetEnvironmentVariable("AORMS_BIG"), out var bigN) && bigN > 0 && s3.CanWrite)
+{
+    var target = (await api.ListAsync()).FirstOrDefault(p => !p.IsBound);
+    if (target is null) Console.WriteLine("SKIP big push — every project is already bound");
+    else
+    {
+        var bigRows = new System.Text.Json.Nodes.JsonArray();
+        for (var i = 0; i < bigN; i++) bigRows.Add(new System.Text.Json.Nodes.JsonObject { ["n"] = "C" + i, ["len"] = i });
+        var big = new System.Text.Json.Nodes.JsonObject { ["project"] = new System.Text.Json.Nodes.JsonObject { ["name"] = "Smoke big" }, ["columns"] = bigRows };
+        var res = await api.PushOnlineAsync(target.ProjectOfficeId, big);
+        Check("big project pushed in batches", res.Rows == bigN && res.Pending.Count == 0, $"{res.Rows} rows, head {res.HeadSeq}");
+        var back = await api.PullAsync(res.AqcProjectId);
+        Check("big project pulls back complete", back.Rows.Count == bigN, $"{back.Rows.Count} rows");
+    }
+}
+
+if (int.TryParse(Environment.GetEnvironmentVariable("AORMS_BIG"), out var bookN) && bookN > 0 && s3.Can("fees:manage"))
+{
+    var bigItems = Enumerable.Range(0, bookN).Select(i => new RateItem("BIG-" + i, "Smoke", "Item " + i, "nos", i + 0.25)).ToArray();
+    var bp = await new RateBooksApi(a).PublishAsync("smoke-big-book", "Smoke big book", "", bigItems, activate: false);
+    var bg = await new RateBooksApi(a).GetAsync(bp.VersionId);
+    Check("big rate book reads back complete", bg.Items.Count == bookN && bg.Items[^1].Code == "BIG-" + (bookN - 1), $"{bg.Items.Count} items");
+}
+
 // A5: contractor inbox (read-only). Set AORMS_CERTIFY_BILL=<bill id> to also certify that bill (changes data).
 var inboxApi = new InboxApi(a);
 var inbox = await inboxApi.GetAsync();
