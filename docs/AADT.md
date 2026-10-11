@@ -13,7 +13,8 @@ Instructions for anyone (person or agent) working on AQC. Written 2026-10-11 on 
 * **The `hcwcad:` prefix in `source` stays** (`hcwcad:<drawing_id>`). It is stored in users' projects, so renaming it would break re-import. If the owner wants it renamed, that is a migration, decided by the owner.
 * **hcwCAD-KIT is still the only program that writes the file today.** Where this document says "the plugin" or `HCWBRIDGE`, it describes hcwCAD-KIT's behaviour, which is the behaviour AADT's bridge command has to match.
 * **Decided (owner, 2026-10-11): AADT writes the `hcw-aqc-bridge` v1 file.** AQC does not read AADT's own drawing format. AADT's port plan lists this as its last item (project data, floors, bridge file). What AADT builds must follow `docs/bridge/` here and the behaviour in "What hcwCAD-KIT did" below.
-* **Still open for the owner:** what AADT's export command is called, and whether AADT also reads the file back (the `HCWBRIDGEIMPORT` direction: levels, project details, beam depths). Do not guess; ask.
+* **Decided (owner, 2026-10-11): the export command in AADT is called `aqcexport`.** It writes `<drawing>.aqcbridge.json` and takes the place of hcwCAD-KIT's `HCWBRIDGE`.
+* **Still open for the owner:** whether AADT also reads the file back (the `HCWBRIDGEIMPORT` direction: levels, project details, beam depths). Do not guess; ask.
 
 ## The rule
 
