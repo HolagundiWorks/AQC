@@ -114,6 +114,22 @@ if (Environment.GetEnvironmentVariable("AORMS_CERTIFY_BILL") is { Length: > 0 } 
     catch (ConnectException e) { Check("certify twice refused", e.Code == "already_certified", e.Code); }
 }
 
+// A6: shared rate books. Publishes one small, fixed "smoke-book" (not activated); re-runs are unchanged no-ops.
+var books = new RateBooksApi(a);
+var onlineBooks = await books.ListAsync();
+Check("rate books listed", true, $"{onlineBooks.Count} books, active: {onlineBooks.FirstOrDefault(b => b.IsActive)?.Name ?? "none"}");
+if (s3.Can("fees:manage"))
+{
+    var items = new[] { new RateItem("SMK-1", "Smoke", "Smoke item", "nos", 1234.5), new RateItem("SMK-2", "Smoke", "Second", "cum", 99) };
+    var pub1 = await books.PublishAsync("smoke-book", "Smoke book", "from Aorms.Connect.Smoke", items, activate: false);
+    var pub2 = await books.PublishAsync("smoke-book", "Smoke book", "from Aorms.Connect.Smoke", items.Reverse().ToArray(), activate: false);
+    Check("rate book publish is idempotent (order-independent)", !pub2.Changed && pub1.VersionId == pub2.VersionId, $"rev {pub2.Revision}");
+    var got = await books.GetAsync(pub1.VersionId);
+    Check("rate book round-trips rupee values", got.Items.Any(i => i.Code == "SMK-1" && i.Rate == 1234.5), $"{got.Items.Count} items");
+    var plan = RateBooksApi.Plan(new[] { new LocalRateBook("smoke-book", "Smoke book", pub1.Revision) }, await books.ListAsync());
+    Check("sign-in merge plan sees it in sync", plan.Any(p => p.ClientId == "smoke-book" && p.Action == RateBookAction.InSync));
+}
+
 // Wrong password.
 using var bad = new ConnectClient(new Uri(url), new InMemoryTokenStore());
 try { await bad.SignInAsync(email, "definitely-wrong", "x"); Check("wrong password refused", false); }
