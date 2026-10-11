@@ -22,6 +22,13 @@ internal sealed class FakeServer : HttpMessageHandler
         return this;
     }
 
+    public FakeServer OnThrow(string route)
+    {
+        if (!Routes.TryGetValue(route, out var q)) Routes[route] = q = new();
+        q.Enqueue(() => throw new HttpRequestException("network down"));
+        return this;
+    }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
     {
         string path = req.RequestUri!.AbsolutePath.TrimStart('/');
