@@ -1449,6 +1449,26 @@ public sealed partial class MainWindow : Window, IAppCommandBus, IAssistantConfi
         AppNotify.Success("Import from CAD", plan.Summary);
     }
 
+    private async void ExportCad_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileSavePicker();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+        picker.SuggestedFileName = ProjectStore.Current.Name.Replace(' ', '_') + ".aqcbridge";
+        picker.FileTypeChoices.Add("AQC bridge file", new List<string> { ".json" });
+        var file = await picker.PickSaveFileAsync();
+        if (file is null) return;
+        try
+        {
+            await System.IO.File.WriteAllTextAsync(file.Path, CadImportService.BuildExport());
+        }
+        catch (Exception ex)
+        {
+            AppNotify.Error("Export for CAD failed", ex.Message);
+            return;
+        }
+        AppNotify.Success("Export for CAD", $"{file.Name}: project details, floors above the plinth and beam depths. Apply it in the CAD program.");
+    }
+
     private void UndoCadImport_Click(object sender, RoutedEventArgs e)
     {
         if (!CadImportService.CanUndo) { AppNotify.Warning("Import from CAD", "Nothing to undo."); return; }
