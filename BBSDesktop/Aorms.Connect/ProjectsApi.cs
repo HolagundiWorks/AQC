@@ -11,7 +11,8 @@ public sealed record OnlineProject(string ProjectOfficeId, string Ref, string Ti
 {
     public bool IsBound => Aqc is not null;
 }
-public sealed record PushResult(string AqcProjectId, long HeadSeq, int Rows);
+/// <summary><c>Pending</c> = rows not yet sent (empty when the whole project went up).
+public sealed record PushResult(string AqcProjectId, long HeadSeq, int Rows, IReadOnlyList<SyncRow> Pending);
 public sealed record PulledProject(JsonObject Settings, List<SyncRow> Rows, long HeadSeq);
 
 /// <summary>Online project list, push-online, pull and open-from-seed (AQC-CLIENT-SPEC §3).</summary>
@@ -44,19 +45,37 @@ public sealed class ProjectsApi
         return (JsonObject)JsonNode.Parse(j.GetRawText())!;
     }
 
-    /// <summary>Binds a local project to an AORMS project. Rows are sent in the first request (the server accepts a large first push); the
-    /// document is mutated so every take-off row carries its <c>_rid</c>.</summary>
+    /// <summary>Rows in the binding request; the rest follow in lease-guarded batches so a 10 000-row project never goes up as one body.</summary>
+    public const int FirstBatch = ProjectSync.BatchSize;
+
+    /// <summary>Binds a local project to an AORMS project: the first ≤500 rows go with the binding, the remainder in ≤500-row batches under the
+    /// edit lease. The document is mutated so every take-off row carries its <c>_rid</c>. If a later batch fails the project IS bound with the
+    /// rows so far — the caller keeps the unsent remainder (<see cref="PushResult.Pending"/>) in its outbox and carries on.</summary>
     public async Task<PushResult> PushOnlineAsync(string projectOfficeId, JsonObject projectDoc, CancellationToken ct = default)
     {
         var sync = ProjectMapper.ToSync(projectDoc);
+        var first = sync.Rows.Take(FirstBatch).ToList();
         var j = await _c.PostAsync<JsonElement>("api/aqc/v1/projects", new
         {
             projectOfficeId,
             formatVersion = ProjectMapper.FormatVersion,
             settings = sync.Settings,
-            rows = ProjectMapper.ToWire(sync.Rows),
+            rows = ProjectMapper.ToWire(first),
         }, ct);
-        return new PushResult(j.GetProperty("aqcProjectId").GetString()!, j.GetProperty("headSeq").GetInt64(), j.TryGetProperty("rows", out var r) ? r.GetInt32() : sync.Rows.Count);
+        var id = j.GetProperty("aqcProjectId").GetString()!;
+        long head = j.GetProperty("headSeq").GetInt64();
+        var rest = sync.Rows.Skip(FirstBatch).ToList();
+        var sent = first.Count;
+        if (rest.Count > 0)
+        {
+            var box = new Outbox(new NullOutboxStore());
+            box.UpsertMany(rest);
+            var ps = new ProjectSync(_c, id, head, box);
+            var flushed = await ps.FlushAsync(ct);
+            sent += flushed.Sent; head = ps.HeadSeq;
+            return new PushResult(id, head, sent, box.Snapshot());
+        }
+        return new PushResult(id, head, sent, Array.Empty<SyncRow>());
     }
 
     /// <summary>Pulls every row for an already-bound project, paging until done.</summary>

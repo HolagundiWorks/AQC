@@ -20,6 +20,8 @@ public enum SyncState
     ReadOnlyRole,
     /// <summary>Stopped because the session moved to another computer; the outbox is kept.</summary>
     SessionReplaced,
+    /// <summary>The sign-in ended (refresh token refused). The outbox is kept: sign in again and open a new <see cref="ProjectSync"/> over the same <see cref="Outbox"/>.</summary>
+    SignedOut,
 }
 
 /// <summary>Persists unsent changes so they survive restarts (the app supplies a file-backed store; AQC can be offline for days).</summary>
@@ -34,6 +36,13 @@ public sealed class InMemoryOutboxStore : IOutboxStore
     string? _json;
     public string? Load() => _json;
     public void Save(string json) => _json = json;
+}
+
+/// <summary>A store that keeps nothing — for short-lived outboxes (e.g. the remainder of a first push) where re-serialising on every add would be quadratic.</summary>
+public sealed class NullOutboxStore : IOutboxStore
+{
+    public string? Load() => null;
+    public void Save(string json) { }
 }
 
 /// <summary>Unsent changes keyed by (section,row_id): a later change to the same row replaces the earlier one; order is first-change order.</summary>
@@ -60,6 +69,16 @@ public sealed class Outbox
 
     public void Upsert(string section, string rowId, JsonObject fields) => Put(new SyncRow(section, rowId, (JsonObject)fields.DeepClone()));
     public void Delete(string section, string rowId) => Put(new SyncRow(section, rowId, new JsonObject(), true));
+
+    /// <summary>Adds many rows and saves once (a per-row save rewrites the whole outbox, which is quadratic for thousands of rows).</summary>
+    public void UpsertMany(IEnumerable<SyncRow> rows)
+    {
+        lock (_gate)
+        {
+            foreach (var r in rows) Put(r, persist: false);
+            Persist();
+        }
+    }
 
     /// <summary>Removes rows that were sent, but only if they haven't changed again since the snapshot was taken.</summary>
     public void Acknowledge(IEnumerable<SyncRow> sent)
@@ -132,7 +151,7 @@ public sealed class ProjectSync
     public Outbox Outbox { get; }
     public bool HasLease { get; private set; }
     public SyncState State { get => _state; private set { if (_state != value) { _state = value; StateChanged?.Invoke(value); } } }
-    public bool CanEdit => _canWrite && HasLease && State != SyncState.SessionReplaced;
+    public bool CanEdit => _canWrite && HasLease && State is not (SyncState.SessionReplaced or SyncState.SignedOut);
     public event Action<SyncState>? StateChanged;
     /// <summary>A row the server refused (400); it has been dropped from the outbox so the rest can flow.</summary>
     public event Action<SyncRow, string>? RowRejected;
@@ -155,6 +174,8 @@ public sealed class ProjectSync
             HasLease = j.TryGetProperty("held", out var h) && h.ValueKind == JsonValueKind.True;
         }
         catch (ConnectException e) when (e.IsSessionReplaced) { HasLease = false; State = SyncState.SessionReplaced; return false; }
+        catch (ConnectException e) when (e.Status == 401) { HasLease = false; State = SyncState.SignedOut; return false; }
+        catch (ConnectException e) when (e.Status >= 500 || e.IsRateLimited) { GoOffline(e.RetryAfterSeconds); return HasLease; }
         catch (Exception e) when (IsNetwork(e)) { GoOffline(); return HasLease; }
         if (!HasLease) State = SyncState.ReadOnlyLeaseHeld;
         else if (State is SyncState.ReadOnlyLeaseHeld or SyncState.Offline) State = Outbox.Count > 0 ? SyncState.Pending : SyncState.Synced;
@@ -164,7 +185,7 @@ public sealed class ProjectSync
     /// <summary>Sends the outbox in ≤500-row batches, oldest first. Safe to call any time; never throws for expected failures.</summary>
     public async Task<FlushResult> FlushAsync(CancellationToken ct = default)
     {
-        if (!_canWrite || State == SyncState.SessionReplaced) return new FlushResult(0, Outbox.Count, State);
+        if (!_canWrite || State is SyncState.SessionReplaced or SyncState.SignedOut) return new FlushResult(0, Outbox.Count, State);
         int sent = 0;
         while (true)
         {
@@ -187,6 +208,7 @@ public sealed class ProjectSync
                 if (!await AcquireLeaseAsync(ct)) break; // someone else has it: keep the rows for review
             }
             catch (ConnectException e) when (e.IsSessionReplaced) { State = SyncState.SessionReplaced; break; }
+            catch (ConnectException e) when (e.Status == 401) { State = SyncState.SignedOut; break; }
             catch (ConnectException e) when (e.Status == 403) { State = SyncState.ReadOnlyRole; break; }
             catch (ConnectException e) when (e.Status == 400)
             {
@@ -247,7 +269,7 @@ public sealed class ProjectSync
     /// <summary>Drives timers: renews the lease every 60 s (or retries every 30 s when read-only) and flushes after the debounce.</summary>
     public async Task TickAsync(CancellationToken ct = default)
     {
-        if (!_canWrite || State == SyncState.SessionReplaced) return;
+        if (!_canWrite || State is SyncState.SessionReplaced or SyncState.SignedOut) return;
         var now = _now();
         var every = HasLease ? LeaseRenewEvery : LeaseRetryEvery;
         if (now - _lastLeaseAttempt >= every && State != SyncState.Offline) await AcquireLeaseAsync(ct);
