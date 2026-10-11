@@ -1,0 +1,12 @@
+{
+  "format": "hcw-aqc-bridge",
+  "version": 1,
+  "source": { "app": "hcwCAD-KIT", "host": "AutoCAD 2022", "drawing": "building permission.dwg", "drawing_id": "6f1c1b0e-7a52-4d0a-9c1e-2d8a3f4b5c60", "exported": "2026-10-07T10:30:00Z" },
+  "units": "mm",
+  "project": { "name": "Residence for Mr Rao", "client_name": "S. Rao", "company_name": "Holgundi Consulting Works", "location": "Hospet", "address": "12, 4th Cross, Hospet", "pid": "12-34-56", "site_area_m2": 186.5, "plot_use": "Residential" },
+  "levels": [
+    { "name": "Ground", "height_mm": 3150, "slab_thickness_mm": 150, "beam_depth_mm": 450, "ceiling_mm": 3000, "lintel_bottom_mm": 2100 },
+    { "name": "First", "height_mm": 3150, "slab_thickness_mm": 150, "beam_depth_mm": 450, "ceiling_mm": 3000, "lintel_bottom_mm": 2100 }
+  ],
+  "beam_depths_mm": [ 300, 375, 450 ]
+}

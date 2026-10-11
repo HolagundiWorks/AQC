@@ -1,0 +1,43 @@
+{
+  "format": "hcw-aqc-bridge",
+  "version": 1,
+  "source": { "app": "hcwCAD-KIT", "host": "AutoCAD 2022", "drawing": "small house.dwg", "drawing_id": "0b7d9c34-1e6f-4f0b-8a13-9b2c7d5e41aa", "exported": "2026-10-07T11:00:00Z" },
+  "units": "mm",
+  "project": { "name": "Small house", "client_name": "A. Kumar", "location": "Hospet", "site_area_m2": 120, "plot_use": "Residential" },
+  "levels": [
+    { "name": "Ground", "height_mm": 3150, "slab_thickness_mm": 150, "beam_depth_mm": 450, "ceiling_mm": 3000, "lintel_bottom_mm": 2100 }
+  ],
+  "beam_depths_mm": [ 300, 450 ],
+  "walls": [
+    { "ref": "W0001", "level": "Ground", "length_mm": 9000, "height_mm": 3000, "thickness_mm": 230, "layer": "A-WALL" },
+    { "ref": "W0002", "level": "Ground", "length_mm": 6000, "height_mm": 3000, "thickness_mm": 230, "layer": "A-WALL" },
+    { "ref": "W0003", "level": "Ground", "length_mm": 4500, "height_mm": 3000, "thickness_mm": 114.3, "layer": "A-WALL" }
+  ],
+  "openings": [
+    { "ref": "2A1", "kind": "Door", "mark": "D3", "level": "Ground", "width_mm": 1200, "height_mm": 2100, "sill_mm": 0, "type": "double", "wall_ref": "W0001" },
+    { "ref": "2A2", "kind": "Door", "mark": "D2", "level": "Ground", "width_mm": 900, "height_mm": 2100, "sill_mm": 0, "type": "single", "wall_ref": "W0003" },
+    { "ref": "2A3", "kind": "Door", "mark": "D2", "level": "Ground", "width_mm": 900, "height_mm": 2100, "sill_mm": 0, "type": "single", "wall_ref": "W0003" },
+    { "ref": "2B1", "kind": "Window", "mark": "W3", "level": "Ground", "width_mm": 1200, "height_mm": 1200, "sill_mm": 900, "wall_ref": "W0002" },
+    { "ref": "2B2", "kind": "Window", "mark": "V1", "level": "Ground", "width_mm": 600, "height_mm": 450, "sill_mm": 1800, "wall_ref": "W0002" }
+  ],
+  "opening_schedule": [
+    { "mark": "D2", "kind": "Door", "width_mm": 900, "height_mm": 2100, "sill_mm": 0, "nos": 2, "type": "single" },
+    { "mark": "D3", "kind": "Door", "width_mm": 1200, "height_mm": 2100, "sill_mm": 0, "nos": 1, "type": "double" },
+    { "mark": "W3", "kind": "Window", "width_mm": 1200, "height_mm": 1200, "sill_mm": 900, "nos": 1 },
+    { "mark": "V1", "kind": "Window", "width_mm": 600, "height_mm": 450, "sill_mm": 1800, "nos": 1 }
+  ],
+  "columns": [
+    { "ref": "3C1", "mark": "C1", "level": "Ground", "width_mm": 230, "depth_mm": 450 },
+    { "ref": "3C2", "mark": "C1", "level": "Ground", "width_mm": 230, "depth_mm": 450 }
+  ],
+  "lintels": [
+    { "ref": "4D1", "mark": "L1", "level": "Ground", "opening_mm": 1200, "bearing_mm": 150, "width_mm": 230, "depth_mm": 150 }
+  ],
+  "rooms": [
+    { "ref": "5E1", "name": "LIVING", "level": "Ground", "area_m2": 22.5, "length_mm": 5000, "breadth_mm": 4500 },
+    { "ref": "5E2", "name": "KITCHEN", "level": "Ground", "area_m2": 9, "length_mm": 3000, "breadth_mm": 3000 }
+  ],
+  "slabs": [
+    { "ref": "6F1", "level": "Ground", "area_m2": 54, "thickness_mm": 150, "length_mm": 9000, "breadth_mm": 6000, "rectangular": true }
+  ]
+}

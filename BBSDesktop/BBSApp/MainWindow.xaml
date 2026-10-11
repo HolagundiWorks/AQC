@@ -60,6 +60,8 @@
                 <MenuBarItem Title="File" AccessKey="F">
                     <MenuFlyoutItem Text="New project" Click="New_Click" AccessKey="N"/>
                     <MenuFlyoutItem Text="Open…" Click="Open_Click" AccessKey="O"/>
+                    <MenuFlyoutItem Text="Import from CAD…" Click="ImportCad_Click"/>
+                    <MenuFlyoutItem Text="Undo last CAD import" Click="UndoCadImport_Click"/>
                     <MenuFlyoutSeparator/>
                     <MenuFlyoutItem Text="Save" Click="Save_Click" AccessKey="S"/>
                     <MenuFlyoutItem Text="Save as…" Click="SaveAs_Click"/>

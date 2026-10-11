@@ -1398,6 +1398,65 @@ public sealed partial class MainWindow : Window, IAppCommandBus, IAssistantConfi
         SelectNavTag("dashboard");
     }
 
+    private async void ImportCad_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+        picker.FileTypeFilter.Add(".json");
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+
+        CadImportService.Prepared prep;
+        try { prep = CadImportService.Prepare(file.Path); }
+        catch (Exception ex)
+        {
+            AppNotify.Error("Import from CAD", ex.Message);
+            return;
+        }
+
+        var plan = prep.Plan;
+        var lines = plan.Items
+            .Where(i => i.Action != Aqc.CadImport.PlanAction.Unchanged)
+            .Select(i => $"{i.Action,-17} {i.Section,-17} {(i.Mark.Length > 0 ? i.Mark : i.Ref)}{(i.Reason.Length > 0 ? "  - " + i.Reason : "")}")
+            .ToList();
+        var other = plan.OtherDrawingId is null
+            ? ""
+            : "\nThis project already holds rows from a different drawing; importing adds this drawing's rows alongside them.\n";
+        var dlg = new ContentDialog
+        {
+            Title = "Import from CAD",
+            Content = new ScrollViewer
+            {
+                MaxHeight = 420,
+                Content = new TextBlock
+                {
+                    Text = plan.Summary + "\n" + other + "\n" + string.Join("\n", lines),
+                    FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Consolas"),
+                    TextWrapping = TextWrapping.Wrap,
+                    IsTextSelectionEnabled = true,
+                },
+            },
+            PrimaryButtonText = "Import",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            IsPrimaryButtonEnabled = plan.HasChanges,
+            XamlRoot = Content.XamlRoot,
+        };
+        if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
+
+        CadImportService.Apply(prep);
+        RefreshWindowTitle();
+        AppNotify.Success("Import from CAD", plan.Summary);
+    }
+
+    private void UndoCadImport_Click(object sender, RoutedEventArgs e)
+    {
+        if (!CadImportService.CanUndo) { AppNotify.Warning("Import from CAD", "Nothing to undo."); return; }
+        CadImportService.Undo();
+        RefreshWindowTitle();
+        AppNotify.Success("Import from CAD", "Last CAD import undone.");
+    }
+
     private async void Open_Click(object sender, RoutedEventArgs e)
     {
         var picker = new FileOpenPicker();

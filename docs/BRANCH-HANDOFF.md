@@ -15,5 +15,5 @@ All remote branches were reviewed and merged into `main`. Nothing was deleted; t
 
 ## Next
 1. Wire `Aorms.Connect` into the Estimation/BBS/PM shells.
-2. Build the hcwCAD-KIT importer ("Import from CAD") per `hcwCAD-KIT/docs/bridge/AQC-IMPORTER-SPEC.md`; take-off happens in CAD.
+2. ~~Build the CAD importer~~ done on `feat/cad-import` (see `docs/AADT.md`). Next: run it in the app and with a real export once AADT is shared; add "Export for CAD".
 3. Then retire `BBSApp/Controls/TakeoffCanvas.cs` if the owner agrees.
