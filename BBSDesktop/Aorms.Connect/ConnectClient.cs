@@ -273,6 +273,16 @@ public sealed class ConnectClient : IDisposable
             throw new ConnectException((int)res.StatusCode, res.StatusCode >= HttpStatusCode.InternalServerError ? "unavailable" : "upload_failed", "The file couldn't be uploaded.");
     }
 
+    /// <summary>GETs bytes from a signed storage URL (no AORMS bearer).</summary>
+    internal async Task<byte[]> GetSignedAsync(string url, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, new Uri(url, UriKind.RelativeOrAbsolute));
+        using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            throw new ConnectException((int)res.StatusCode, res.StatusCode >= HttpStatusCode.InternalServerError ? "unavailable" : "download_failed", "The file couldn't be downloaded.");
+        return await res.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
+    }
+
     public void Dispose()
     {
         _http.Dispose();

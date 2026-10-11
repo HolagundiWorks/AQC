@@ -98,6 +98,22 @@ if (unbound is not null)
 }
 else Console.WriteLine("SKIP push — every project is already bound");
 
+// A5: contractor inbox (read-only). Set AORMS_CERTIFY_BILL=<bill id> to also certify that bill (changes data).
+var inboxApi = new InboxApi(a);
+var inbox = await inboxApi.GetAsync();
+Check("contractor inbox read", inbox.Now.Length > 0, $"{inbox.Bills.Count} bills, {inbox.Submissions.Count} submissions");
+var sample = inbox.Bills.FirstOrDefault(b => b.Lines.Count > 0);
+if (sample is not null) Check("bill lines carry paise amounts", sample.Lines.All(l => l.AmountPaise >= 0) && sample.GrossPaise > 0, $"{sample.Ref} gross {sample.GrossPaise}");
+if (Environment.GetEnvironmentVariable("AORMS_CERTIFY_BILL") is { Length: > 0 } billId && s3.Can("cost:approve"))
+{
+    var bill = inbox.Bills.First(b => b.Id == billId);
+    var cert = new Certification((long)(bill.GrossPaise * bill.RetentionPct / 100), (long)(bill.GrossPaise * bill.GstPct / 100));
+    var res = await inboxApi.CertifyAsync(billId, cert);
+    Check("bill certified", res.Certified, $"net {cert.NetPaise(bill.GrossPaise)}");
+    try { await inboxApi.CertifyAsync(billId, cert); Check("certify twice refused", false); }
+    catch (ConnectException e) { Check("certify twice refused", e.Code == "already_certified", e.Code); }
+}
+
 // Wrong password.
 using var bad = new ConnectClient(new Uri(url), new InMemoryTokenStore());
 try { await bad.SignInAsync(email, "definitely-wrong", "x"); Check("wrong password refused", false); }
