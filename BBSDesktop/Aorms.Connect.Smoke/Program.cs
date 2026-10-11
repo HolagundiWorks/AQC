@@ -59,6 +59,25 @@ if (unbound is not null)
         Check("pull rebuilds the same take-off rows", System.Text.Json.Nodes.JsonNode.DeepEquals(doc["masonry"], rebuilt["masonry"]) && System.Text.Json.Nodes.JsonNode.DeepEquals(doc["columns"], rebuilt["columns"]));
         try { await api.PushOnlineAsync(unbound.ProjectOfficeId, doc); Check("a project binds only once", false); }
         catch (ConnectException e) { Check("a project binds only once", e.Status == 400, e.Message); }
+
+        // A3: lease, edit one row, flush, and a second user sees just that change.
+        var sync = new ProjectSync(a, pushed.AqcProjectId, pushed.HeadSeq, new Outbox());
+        Check("owner takes the edit lease", await sync.AcquireLeaseAsync());
+        var mas = (System.Text.Json.Nodes.JsonObject)((System.Text.Json.Nodes.JsonArray)doc["masonry"]!)[0]!.DeepClone();
+        mas["length"] = "19000";
+        sync.Outbox.Upsert("masonry", mas["_rid"]!.GetValue<string>(), mas); sync.NoteChange();
+        var flushed = await sync.FlushAsync();
+        Check("edit flushed", flushed.Sent == 1 && sync.State == SyncState.Synced && sync.HeadSeq == pushed.HeadSeq + 1, $"head {sync.HeadSeq}");
+        string? vE = Environment.GetEnvironmentVariable("AORMS_VIEWER_EMAIL"), vP = Environment.GetEnvironmentVariable("AORMS_VIEWER_PASSWORD");
+        if (vE is not null && vP is not null)
+        {
+            using var other = new ConnectClient(new Uri(url), new InMemoryTokenStore());
+            await other.SignInAsync(vE, vP, "Smoke second client");
+            var theirs = new ProjectSync(other, pushed.AqcProjectId, pushed.HeadSeq, new Outbox());
+            var delta = await theirs.CatchUpAsync();
+            Check("second client sees only the delta", delta.Rows.Count == 1 && delta.Rows[0].Section == "masonry" && delta.Rows[0].Fields["length"]?.ToString() == "19000" && theirs.HeadSeq == sync.HeadSeq);
+            Check("viewer cannot take the lease", !await theirs.AcquireLeaseAsync() && theirs.State == SyncState.ReadOnlyRole);
+        }
     }
 }
 else Console.WriteLine("SKIP push — every project is already bound");
