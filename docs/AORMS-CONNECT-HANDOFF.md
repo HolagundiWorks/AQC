@@ -10,9 +10,10 @@ Server side + full spec live in the AORMS repo (`HolagundiWorks/aorms`): `docs/e
 |---|---|---|
 | A1 | `ConnectClient.cs`, `Models.cs`, `ConnectException.cs`, `TokenStore.cs` | config, sign-in, single session, bearer + `x-aqc-session`, token refresh (401 → refresh once), `RestoreAsync` (never steals a session), take-over, events (SessionReplaced / NotConnected / SignedOut) |
 | A2 | `ProjectMapper.cs`, `ProjectsApi.cs` | `.bbsproj` v17 ⇄ rows + settings skeleton, `_rid` minting; list online projects, seed, push online, pull (paged) |
+| A4 | `VersionsApi.cs` | version kinds + capability check, rupees→paise (half away from zero), signed-URL file upload (3 steps, SHA-256 as content hash), summaries for estimate / IPC / final account |
 | A3 | `ProjectSync.cs` | edit lease (renew 60 s / retry 30 s), persistent `Outbox`, 2 s debounce, 500-row batches, 423 re-acquire, 400 row isolation, offline back-off, `session_replaced` stop, catch-up that asks for review when local changes exist |
 
-Tests: `BBSDesktop/Aorms.Connect.Tests` (35 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
+Tests: `BBSDesktop/Aorms.Connect.Tests` (49 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
 
 ## NOT built / NOT verified (this is the local agent's job)
 
@@ -21,14 +22,14 @@ Tests: `BBSDesktop/Aorms.Connect.Tests` (35 xunit, fake HTTP). Live walkthrough:
 3. **`IOutboxStore` file-backed implementation** not written (only in-memory). Needed so unsent edits survive restarts.
 4. **Home screen** (sign-in first, *Continue without signing in* → Community; Online projects list, then Local; open from seed; *Push online*). Spec §2, §3, §9.
 5. **ProjectStore integration**: call `Outbox.Upsert/Delete` + `NoteChange()` from `ProjectStore.Notify()`; drive `ProjectSync.TickAsync()` from a ~1 s UI timer; mint `_rid` on take-off rows (use `ProjectMapper.ToSync`).
-6. **A4–A7 not started**: versions + file upload, inbox/certify, shared rate books, hardening (offline for days, lease expiry mid-edit, 10k-row project).
+6. **A5–A7 not started**: inbox/certify, shared rate books, hardening (offline for days, lease expiry mid-edit, 10k-row project).
 7. Old `Aorms.Bridge`, `Aorms.Bridge.Smoke`, and the Connect/licence code are still in the tree; remove once nothing references them.
 
 ## Run the tests (no AORMS needed)
 
 ```
 cd BBSDesktop
-dotnet test Aorms.Connect.Tests          # expect 35 passed
+dotnet test Aorms.Connect.Tests          # expect 49 passed
 ```
 
 ## Run the live walkthrough
@@ -62,7 +63,8 @@ unlinked account).
 - Lease contention: two **writer** accounts on one project (only one writer account existed in cloud tests) — second must open read-only with "Edited by <name>", retry every 30 s.
 - Lease expiry mid-edit (let it lapse > 120 s offline, then edit): expect 423 → re-acquire or read-only with rows kept.
 - Offline for days: edits accumulate in the outbox, restart the app, reconnect, replay in order.
-- File uploads (A4): signed upload URLs could not be exercised in cloud (placeholder storage keys) — test on the deployed site.
+- **File upload (A4) was never run end to end**: signed upload URLs could not be exercised in cloud (placeholder storage keys; the smoke prints `SKIP file upload`). On the deployed site, publish a PDF estimate and confirm it appears in AORMS `/aqc` with its total, and that the PUT to the signed URL succeeds with a raw body + Content-Type (Supabase storage may want multipart — if it 4xxs, that is the first thing to adjust in `ConnectClient.PutSignedAsync`).
+- `POST /versions` answers `{ version: <number> }` (a version number, not a GUID).
 
 ## Known server notes
 
