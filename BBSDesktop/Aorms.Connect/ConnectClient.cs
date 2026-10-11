@@ -263,6 +263,16 @@ public sealed class ConnectClient : IDisposable
         return JsonSerializer.Deserialize<T>(text, Json) ?? throw new ConnectException((int)res.StatusCode, "bad_response", "AORMS sent an empty answer.");
     }
 
+    /// <summary>PUTs bytes to a one-time signed storage URL (no AORMS bearer: the URL itself is the credential).</summary>
+    internal async Task PutSignedAsync(string uploadUrl, byte[] bytes, string contentType, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Put, new Uri(uploadUrl, UriKind.RelativeOrAbsolute)) { Content = new ByteArrayContent(bytes) };
+        req.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            throw new ConnectException((int)res.StatusCode, res.StatusCode >= HttpStatusCode.InternalServerError ? "unavailable" : "upload_failed", "The file couldn't be uploaded.");
+    }
+
     public void Dispose()
     {
         _http.Dispose();
