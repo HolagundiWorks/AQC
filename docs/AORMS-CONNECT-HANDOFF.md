@@ -12,9 +12,10 @@ Server side + full spec live in the AORMS repo (`HolagundiWorks/aorms`): `docs/e
 | A2 | `ProjectMapper.cs`, `ProjectsApi.cs` | `.bbsproj` v17 ⇄ rows + settings skeleton, `_rid` minting; list online projects, seed, push online, pull (paged) |
 | A4 | `VersionsApi.cs` | version kinds + capability check, rupees→paise (half away from zero), signed-URL file upload (3 steps, SHA-256 as content hash), summaries for estimate / IPC / final account |
 | A5 | `InboxApi.cs` | contractor inbox (bills with lines, submissions, `since`), bill backup download, certify (paise deductions, optional IPC version), net-payable helper |
+| A6 | `RateBooksApi.cs` | shared rate books: list, get, publish (idempotent, duplicate codes refused), activate, and the sign-in merge `Plan` (match on `client_id`; never overwrites silently) |
 | A3 | `ProjectSync.cs` | edit lease (renew 60 s / retry 30 s), persistent `Outbox`, 2 s debounce, 500-row batches, 423 re-acquire, 400 row isolation, offline back-off, `session_replaced` stop, catch-up that asks for review when local changes exist |
 
-Tests: `BBSDesktop/Aorms.Connect.Tests` (54 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
+Tests: `BBSDesktop/Aorms.Connect.Tests` (59 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
 
 ## NOT built / NOT verified (this is the local agent's job)
 
@@ -23,14 +24,14 @@ Tests: `BBSDesktop/Aorms.Connect.Tests` (54 xunit, fake HTTP). Live walkthrough:
 3. **`IOutboxStore` file-backed implementation** not written (only in-memory). Needed so unsent edits survive restarts.
 4. **Home screen** (sign-in first, *Continue without signing in* → Community; Online projects list, then Local; open from seed; *Push online*). Spec §2, §3, §9.
 5. **ProjectStore integration**: call `Outbox.Upsert/Delete` + `NoteChange()` from `ProjectStore.Notify()`; drive `ProjectSync.TickAsync()` from a ~1 s UI timer; mint `_rid` on take-off rows (use `ProjectMapper.ToSync`).
-6. **A6–A7 not started**: shared rate books, hardening (offline for days, lease expiry mid-edit, 10k-row project).
+6. **A7 not started**: (rate books are library-only — mapping to AQC's `RateBookStore` is app work), hardening (offline for days, lease expiry mid-edit, 10k-row project).
 7. Old `Aorms.Bridge`, `Aorms.Bridge.Smoke`, and the Connect/licence code are still in the tree; remove once nothing references them.
 
 ## Run the tests (no AORMS needed)
 
 ```
 cd BBSDesktop
-dotnet test Aorms.Connect.Tests          # expect 54 passed
+dotnet test Aorms.Connect.Tests          # expect 59 passed
 ```
 
 ## Run the live walkthrough
