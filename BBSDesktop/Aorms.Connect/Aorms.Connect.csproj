@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Aorms.Connect</RootNamespace>
+    <AssemblyName>Aorms.Connect</AssemblyName>
+    <Description>AQC connected mode — AORMS sign-in, single session, API client (OSS). Replaces Aorms.Bridge's licence/Connect flow.</Description>
+    <Company>Human Centric Works</Company>
+    <Version>0.2.0</Version>
+  </PropertyGroup>
+</Project>
