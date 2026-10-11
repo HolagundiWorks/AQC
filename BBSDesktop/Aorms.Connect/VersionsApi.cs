@@ -11,13 +11,13 @@ namespace Aorms.Connect;
 public static class VersionKinds
 {
     public const string Estimate = "estimate", Boq = "boq", Schedule = "schedule", RunningBill = "running_bill", Ipc = "ipc",
-        FinalAccount = "final_account", Bbs = "bbs", JointMeasurement = "joint_measurement";
+        FinalAccount = "final_account", Bbs = "bbs", JointMeasurement = "joint_measurement", CadBridge = "cad_bridge";
 
     public static string RequiredCapability(string kind) => kind switch
     {
         Estimate or Boq or Schedule => "fees:manage",
         RunningBill or Ipc or FinalAccount => "cost:approve",
-        Bbs or JointMeasurement => "write",
+        Bbs or JointMeasurement or CadBridge => "write",
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown version kind."),
     };
 
@@ -39,7 +39,7 @@ public sealed class VersionsApi
 {
     public static readonly HashSet<string> AllowedContentTypes = new()
     {
-        "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv", "image/png", "image/jpeg",
+        "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv", "image/png", "image/jpeg", "application/json",
     };
     public const long MaxFileBytes = 25L * 1024 * 1024;
 

@@ -22,3 +22,25 @@ public sealed class InMemoryTokenStore : IConnectTokenStore
     public void Save(StoredSession session) => _s = session;
     public void Clear() => _s = null;
 }
+
+/// <summary>
+/// The sign-in shared by every AORMS suite app on one machine (AAD, AQC): one OS credential, target <c>AORMS/Connect</c>,
+/// blob <c>{ "v":1, "refreshToken", "email", "updatedAt" }</c>. The per-app <see cref="IConnectTokenStore"/> keeps only that app's
+/// session id. See docs/esti/AORMS-SUITE-SIGNIN.md in the AORMS repo.
+/// </summary>
+public sealed record SharedSignIn(string RefreshToken, string? Email, DateTimeOffset UpdatedAt);
+
+public interface ISharedSignInStore
+{
+    SharedSignIn? Load();
+    void Save(SharedSignIn signIn);
+    void Clear();
+}
+
+public sealed class InMemorySharedSignInStore : ISharedSignInStore
+{
+    private SharedSignIn? _s;
+    public SharedSignIn? Load() => _s;
+    public void Save(SharedSignIn signIn) => _s = signIn;
+    public void Clear() => _s = null;
+}

@@ -22,6 +22,13 @@ internal sealed class FakeServer : HttpMessageHandler
         return this;
     }
 
+    public FakeServer OnDo(string route, Func<HttpResponseMessage> respond)
+    {
+        if (!Routes.TryGetValue(route, out var q)) Routes[route] = q = new();
+        q.Enqueue(respond);
+        return this;
+    }
+
     public FakeServer OnThrow(string route)
     {
         if (!Routes.TryGetValue(route, out var q)) Routes[route] = q = new();

@@ -14,6 +14,7 @@ Instructions for anyone (person or agent) working on AQC. Written 2026-10-11 on 
 * **hcwCAD-KIT is still the only program that writes the file today.** Where this document says "the plugin" or `HCWBRIDGE`, it describes hcwCAD-KIT's behaviour, which is the behaviour AADT's bridge command has to match.
 * **Decided (owner, 2026-10-11): AADT writes the `hcw-aqc-bridge` v1 file.** AQC does not read AADT's own drawing format. AADT's port plan lists this as its last item (project data, floors, bridge file). What AADT builds must follow `docs/bridge/` here and the behaviour in "What hcwCAD-KIT did" below.
 * **Decided (owner, 2026-10-11): the export command in AADT is called `aqcexport`.** It writes `<drawing>.aqcbridge.json` and takes the place of hcwCAD-KIT's `HCWBRIDGE`.
+* **Decided (owner, 2026-10-11): when signed in, the take-off reaches AQC through the AORMS portal** (AAD publishes the same `hcw-aqc-bridge` v1 JSON as a `cad_bridge` version; AQC pulls it via `Aorms.Connect.CadBridgeApi` and runs the same importer). The local `<drawing>.aqcbridge.json` stays as the offline/Community path. One shared AORMS sign-in for AAD and AQC: see `docs/esti/AORMS-SUITE-SIGNIN.md` in the aorms repo.
 * **Still open for the owner:** whether AADT also reads the file back (the `HCWBRIDGEIMPORT` direction: levels, project details, beam depths). Do not guess; ask.
 
 ## The rule
