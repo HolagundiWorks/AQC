@@ -1,0 +1,711 @@
+{
+  "format": "bbsproj",
+  "version": 17,
+  "name": "Test Residence — Pilot Sample",
+  "project": {
+    "name": "Test Residence — Pilot Sample",
+    "location": "Hosapete, Karnataka",
+    "client_name": "Mr. Ravi Kumar",
+    "prepared_by_role": "Architect",
+    "prepared_by_name": "Test Architect",
+    "company_name": "Aurelia Design Collective",
+    "contact_phone": "+91 90000 00000",
+    "contact_email": "studio@example.invalid",
+    "address": "12 MG Road, Hosapete",
+    "gstin": "29ABCDE1234F1Z5",
+    "cin": "",
+    "pan": "ABCDE1234F",
+    "logo_path": "",
+    "hub_project_id": ""
+  },
+  "parties": {
+    "active": "pm",
+    "pm": {
+      "id": "pilot0001",
+      "role": "pm",
+      "company": "Aurelia Design Collective",
+      "signatory_name": "Test Architect",
+      "signatory_role": "Project Manager",
+      "address": "12 MG Road, Hosapete",
+      "phone": "",
+      "email": "",
+      "gstin": "29ABCDE1234F1Z5",
+      "pan": "ABCDE1234F",
+      "number_prefix": "ADC",
+      "logo_path": ""
+    },
+    "contractor": {
+      "id": "pilot0002",
+      "role": "contractor",
+      "company": "Sri Lakshmi Constructions",
+      "signatory_name": "S. Lakshmi",
+      "signatory_role": "Proprietor",
+      "address": "4 Station Road, Hosapete",
+      "phone": "",
+      "email": "",
+      "gstin": "29FGHIJ5678K1Z2",
+      "pan": "FGHIJ5678K",
+      "number_prefix": "SLC",
+      "logo_path": ""
+    }
+  },
+  "estimate_markups": {
+    "electrical_pct": 8,
+    "plumbing_pct": 6,
+    "escalation_pct": 5,
+    "consulting_fee_pct": 3
+  },
+  "concrete_from_rmc": 1,
+  "settings": {
+    "diameters": [
+      8,
+      10,
+      12,
+      16,
+      20,
+      25
+    ],
+    "hook_allowance": {
+      "90": 9,
+      "135": 10,
+      "180": 16
+    },
+    "bend_deduction": {
+      "45": 1,
+      "90": 2,
+      "135": 3
+    },
+    "hysd_bond": 1,
+    "hysd_bond_factor": 1.6,
+    "min_hook_mm": 75,
+    "covers": {
+      "column": 40,
+      "beam": 25,
+      "slab": 20,
+      "footing": 50,
+      "pedestal": 50,
+      "lintel": 25
+    },
+    "default_column_lap": "No",
+    "default_beam_lap": "None",
+    "tau_bd": {
+      "M20": 1.2,
+      "M25": 1.4,
+      "M30": 1.5,
+      "M35": 1.7,
+      "M40": 1.9
+    },
+    "fy": {
+      "Fe250": 250,
+      "Fe415": 415,
+      "Fe500": 500,
+      "Fe550": 550
+    },
+    "civil_yields": {
+      "bricks_per_m3": 500,
+      "bricks_per_m2_half": 55,
+      "mortar_fraction": 0.3,
+      "ssm_mortar_fraction": 0.3,
+      "mortar_dry_factor": 1.33,
+      "wastage": 1.05,
+      "shuttering_wastage": 1.05,
+      "ignore_opening_below_m2": 0.1,
+      "beam_slab_interface_deduct": 0,
+      "wall_plaster_faces": 2,
+      "default_column_sides_exposed": 3,
+      "default_plaster_ceiling": 0,
+      "default_beam_soffit": 0
+    }
+  },
+  "levels": [
+    {
+      "id": "Lvl0",
+      "name": "Plinth",
+      "height_mm": 3200,
+      "slab_thickness_mm": 150,
+      "beam_depth_mm": 450
+    },
+    {
+      "id": "Lvl1",
+      "name": "First floor",
+      "height_mm": 3000,
+      "slab_thickness_mm": 150,
+      "beam_depth_mm": 450
+    }
+  ],
+  "columns": [
+    {
+      "mark": "C1",
+      "nos": "6",
+      "level": "Lvl0",
+      "column_type": "Rectangular",
+      "width": "230",
+      "depth": "450",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "main_bars": "4-16,2-12",
+      "tie_dia": "8",
+      "tie_spacing": "150"
+    },
+    {
+      "mark": "C2",
+      "nos": "4",
+      "level": "Lvl1",
+      "column_type": "Rectangular",
+      "width": "230",
+      "depth": "380",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "main_bars": "6-12",
+      "tie_dia": "8",
+      "tie_spacing": "150"
+    }
+  ],
+  "beams": [
+    {
+      "mark": "B1",
+      "nos": "6",
+      "level": "Lvl1",
+      "span": "3600",
+      "width": "230",
+      "depth": "450",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "bottom_bars": "3-16",
+      "top_bars": "2-12",
+      "stirrup_dia": "8",
+      "stirrup_spacing": "150"
+    },
+    {
+      "mark": "B2",
+      "nos": "4",
+      "level": "Lvl1",
+      "span": "4200",
+      "width": "230",
+      "depth": "450",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "bottom_bars": "3-16,1-12",
+      "top_bars": "2-12",
+      "stirrup_dia": "8",
+      "stirrup_spacing": "150"
+    }
+  ],
+  "pedestals": [],
+  "lintels": [],
+  "slabs": [
+    {
+      "mark": "S1",
+      "nos": "1",
+      "level": "Lvl1",
+      "length": "9000",
+      "breadth": "7200",
+      "thickness": "150",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "main_dia": "10",
+      "main_spacing": "150",
+      "dist_dia": "8",
+      "dist_spacing": "200"
+    }
+  ],
+  "footings": [
+    {
+      "mark": "F1",
+      "nos": "10",
+      "level": "Lvl0",
+      "length": "1500",
+      "breadth": "1500",
+      "depth": "450",
+      "concrete": "M25",
+      "steel": "Fe500",
+      "bar_dia": "12",
+      "bar_spacing": "150"
+    }
+  ],
+  "walls": [],
+  "stairs": [],
+  "masonry": [
+    {
+      "mark": "MW1",
+      "level": "Lvl0",
+      "length": "18000",
+      "height": "3000",
+      "thickness": "230",
+      "unit_type": "Brick",
+      "mortar_mix": "1:6",
+      "deduct_rule": "IS1200 masonry"
+    },
+    {
+      "mark": "MW2",
+      "level": "Lvl1",
+      "length": "16000",
+      "height": "2900",
+      "thickness": "115",
+      "unit_type": "Brick",
+      "mortar_mix": "1:4",
+      "deduct_rule": "IS1200 masonry"
+    }
+  ],
+  "masonry_openings": [
+    {
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "nos": "2",
+      "opening_l": "1000",
+      "opening_h": "2100"
+    },
+    {
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "nos": "4",
+      "opening_l": "1200",
+      "opening_h": "1200"
+    },
+    {
+      "wall_mark": "MW2",
+      "level": "Lvl1",
+      "nos": "3",
+      "opening_l": "900",
+      "opening_h": "2100"
+    }
+  ],
+  "plaster": [
+    {
+      "mark": "PL1",
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "length": "18000",
+      "height": "3000",
+      "thickness": "12",
+      "mortar_mix": "1:4",
+      "faces": "2"
+    }
+  ],
+  "finish_propose": [],
+  "pcc": [
+    {
+      "mark": "PCC1",
+      "level": "Lvl0",
+      "length": "12000",
+      "breadth": "9000",
+      "thickness": "100",
+      "mix": "1:4:8"
+    }
+  ],
+  "earthwork": [
+    {
+      "mark": "EW1",
+      "level": "Lvl0",
+      "length": "14000",
+      "breadth": "11000",
+      "depth": "1500"
+    }
+  ],
+  "ssm": [],
+  "shuttering": [],
+  "flooring": [
+    {
+      "mark": "FL1",
+      "level": "Lvl1",
+      "length": "9000",
+      "breadth": "7200",
+      "finish_type": "Vitrified tiles",
+      "surface_kind": "Floor"
+    }
+  ],
+  "painting": [
+    {
+      "mark": "PT1",
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "length": "18000",
+      "height": "3000",
+      "paint_type": "Emulsion",
+      "coats": "2",
+      "faces": "2"
+    }
+  ],
+  "waterproofing": [],
+  "dpc": [
+    {
+      "mark": "DPC1",
+      "level": "Lvl0",
+      "length": "18000",
+      "width": "230"
+    }
+  ],
+  "coping": [],
+  "screed": [],
+  "vdf": [],
+  "skirting": [
+    {
+      "mark": "SK1",
+      "level": "Lvl1",
+      "length": "32000",
+      "height": "100"
+    }
+  ],
+  "parapet": [],
+  "plinth_protection": [],
+  "doors": [
+    {
+      "mark": "D1",
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "nos": "2",
+      "width": "1000",
+      "height": "2100"
+    }
+  ],
+  "windows": [
+    {
+      "mark": "W1",
+      "wall_mark": "MW1",
+      "level": "Lvl0",
+      "nos": "4",
+      "width": "1200",
+      "height": "1200"
+    }
+  ],
+  "takeoff": {
+    "pdf_path": "",
+    "page": 0,
+    "mm_per_px": 0,
+    "items": []
+  },
+  "schedule": {
+    "start_date": "2026-11-02",
+    "working_days_per_week": 6,
+    "activities": [
+      {
+        "id": "pilot0010",
+        "name": "Site clearance and setting out",
+        "duration": 5,
+        "percent": 100,
+        "wbs": "1.1",
+        "x": null,
+        "y": null,
+        "links": []
+      },
+      {
+        "id": "pilot0011",
+        "name": "Excavation and PCC",
+        "duration": 10,
+        "percent": 100,
+        "wbs": "1.2",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0010",
+            "type": "FS",
+            "lag": 0
+          }
+        ]
+      },
+      {
+        "id": "pilot0012",
+        "name": "Footings and plinth beam",
+        "duration": 20,
+        "percent": 60,
+        "wbs": "2.1",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0011",
+            "type": "FS",
+            "lag": 0
+          }
+        ]
+      },
+      {
+        "id": "pilot0013",
+        "name": "Plinth masonry and DPC",
+        "duration": 8,
+        "percent": 0,
+        "wbs": "2.2",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0012",
+            "type": "FS",
+            "lag": 0
+          }
+        ]
+      },
+      {
+        "id": "pilot0014",
+        "name": "Ground-floor columns",
+        "duration": 12,
+        "percent": 0,
+        "wbs": "3.1",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0012",
+            "type": "SS",
+            "lag": 10
+          }
+        ]
+      },
+      {
+        "id": "pilot0015",
+        "name": "First-floor beams and slab",
+        "duration": 24,
+        "percent": 0,
+        "wbs": "3.2",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0014",
+            "type": "FS",
+            "lag": 0
+          }
+        ]
+      },
+      {
+        "id": "pilot0016",
+        "name": "Superstructure masonry",
+        "duration": 18,
+        "percent": 0,
+        "wbs": "4.1",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0015",
+            "type": "SS",
+            "lag": 10
+          }
+        ]
+      },
+      {
+        "id": "pilot0017",
+        "name": "Plaster, flooring and paint",
+        "duration": 30,
+        "percent": 0,
+        "wbs": "5.1",
+        "x": null,
+        "y": null,
+        "links": [
+          {
+            "pred": "pilot0016",
+            "type": "FS",
+            "lag": 0
+          },
+          {
+            "pred": "pilot0015",
+            "type": "FS",
+            "lag": 0
+          }
+        ]
+      }
+    ]
+  },
+  "office": {
+    "prefix": "ADC",
+    "counters": {},
+    "documents": [
+      {
+        "id": "pilot0300",
+        "type": "LTR",
+        "number": "ADC/LTR/2026-27/001",
+        "issued_by": "pm",
+        "issue_date": "2026-10-20",
+        "to_name": "Sri Lakshmi Constructions",
+        "to_address": "4 Station Road, Hosapete",
+        "subject": "Work order — Test Residence",
+        "body": "Please find the work order enclosed.",
+        "signatory_name": "Test Architect",
+        "signatory_role": "Project Manager",
+        "finalized": 1,
+        "created_utc": "2026-10-20T09:00:00.0000000Z"
+      }
+    ]
+  },
+  "contracts": {
+    "prefix": "ADC",
+    "counters": {},
+    "contracts": [
+      {
+        "id": "pilot0200",
+        "number": "WO/2026/001",
+        "issued_by": "pm",
+        "kind": 0,
+        "title": "Structure and masonry",
+        "contractor_name": "Sri Lakshmi Constructions",
+        "contractor_address": "4 Station Road, Hosapete",
+        "scope": "RCC frame, masonry, plaster",
+        "award_date": "2026-10-25",
+        "completion_date": "2027-04-30",
+        "lump_sum_value": 0,
+        "retention_pct": 5,
+        "lines": [
+          {
+            "description": "PCC 1:4:8",
+            "unit": "cum",
+            "qty": 54,
+            "rate": 5200
+          },
+          {
+            "description": "RCC M25",
+            "unit": "cum",
+            "qty": 62,
+            "rate": 9800
+          },
+          {
+            "description": "Brick masonry 230",
+            "unit": "cum",
+            "qty": 41,
+            "rate": 6400
+          }
+        ],
+        "terms": [
+          "Payment within 15 days of certification.",
+          "Retention 5% released at completion."
+        ],
+        "finalized": 1,
+        "created_utc": "2026-10-25T09:00:00.0000000Z"
+      }
+    ],
+    "rates": [],
+    "terms": []
+  },
+  "accounts": {
+    "prefix": "SLC",
+    "opening_cash": 0,
+    "opening_bank": 0,
+    "counters": {},
+    "bills": [
+      {
+        "id": "pilot0101",
+        "number": "SLC/RA/2026-27/001",
+        "bill_no": 1,
+        "issued_by": "contractor",
+        "date": "2026-12-15",
+        "contract_id": "pilot0200",
+        "contract_label": "WO/2026/001",
+        "party": "Sri Lakshmi Constructions",
+        "retention_pct": 5,
+        "other_deductions": 0,
+        "advance_recovery": 0,
+        "gst_pct": 18,
+        "tds_pct": 2,
+        "cess_pct": 1,
+        "gst_tds_pct": 0,
+        "certified": 1,
+        "lines": [
+          {
+            "description": "PCC 1:4:8",
+            "unit": "cum",
+            "rate": 5200,
+            "qty": 54
+          },
+          {
+            "description": "RCC M25 (footings)",
+            "unit": "cum",
+            "rate": 9800,
+            "qty": 18
+          }
+        ],
+        "created_utc": "2026-12-15T09:00:00.0000000Z"
+      }
+    ],
+    "transactions": [
+      {
+        "id": "pilot0400",
+        "date": "2026-12-30",
+        "issued_by": "pm",
+        "kind": 1,
+        "account": 1,
+        "party": "Sri Lakshmi Constructions",
+        "category": "RA bill",
+        "description": "RA 1 part payment",
+        "amount": 250000,
+        "reference": "UTR-TEST-001"
+      }
+    ]
+  },
+  "stores": {
+    "suppliers": [
+      {
+        "id": "pilot0500",
+        "name": "Test Cement Depot",
+        "contact": "",
+        "gstin": "",
+        "address": "Hosapete"
+      }
+    ],
+    "warehouses": [
+      {
+        "id": "pilot0501",
+        "name": "Site store",
+        "location": "Plot"
+      }
+    ],
+    "orders": [],
+    "grns": [],
+    "issues": [],
+    "counters": {}
+  },
+  "org": {
+    "working_days": 26,
+    "sites": [
+      {
+        "id": "pilot0600",
+        "name": "Test Residence",
+        "location": "Hosapete",
+        "manager": "Site Engineer",
+        "status": "Active"
+      }
+    ],
+    "resources": [
+      {
+        "id": "pilot0601",
+        "kind": "Labour",
+        "name": "Mason",
+        "unit": "day",
+        "rate": 900
+      }
+    ],
+    "employees": [],
+    "payroll": []
+  },
+  "link_rules": [
+    {
+      "id": "msn-plaster",
+      "name": "Plaster from masonry (both faces)",
+      "enabled": 1,
+      "source": "Masonry",
+      "target": "Plaster",
+      "basis": "Area",
+      "factor": 2,
+      "target_unit": "m²",
+      "per_item": 1,
+      "rate_code": "",
+      "rate_override": 0,
+      "notes": ""
+    },
+    {
+      "id": "plaster-paint",
+      "name": "Painting from plaster",
+      "enabled": 1,
+      "source": "Plaster",
+      "target": "Painting",
+      "basis": "Area",
+      "factor": 1,
+      "target_unit": "m²",
+      "per_item": 1,
+      "rate_code": "",
+      "rate_override": 0,
+      "notes": ""
+    }
+  ],
+  "last_estimate": null,
+  "last_estimate_rate_book_version_id": ""
+}

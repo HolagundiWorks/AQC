@@ -40,6 +40,29 @@ Check("restore never takes the session over", await a2.RestoreAsync() == Restore
 var s3 = await a.TakeOverSessionAsync("Smoke A (took over)");
 Check("'Sign in here' takes it back", a.IsConnected && s3.SessionId != s2.SessionId);
 
+// Online projects: list, open from seed, push the pilot sample (optional AORMS_PILOT=path to a .bbsproj), pull it back.
+var api = new ProjectsApi(a);
+var online = await api.ListAsync();
+Check("online project list", online.Count > 0, $"{online.Count} projects, {online.Count(p => p.IsBound)} bound");
+var unbound = online.FirstOrDefault(p => !p.IsBound);
+if (unbound is not null)
+{
+    var seed = await api.GetSeedAsync(unbound.ProjectOfficeId);
+    Check("seed fills title block and parties", seed["project"]?["name"]?.GetValue<string>() is { Length: > 0 } && seed["parties"]?["pm"] is not null, unbound.Title);
+    if (Environment.GetEnvironmentVariable("AORMS_PILOT") is { Length: > 0 } pilot && s3.CanWrite)
+    {
+        var doc = (System.Text.Json.Nodes.JsonObject)System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(pilot))!;
+        var pushed = await api.PushOnlineAsync(unbound.ProjectOfficeId, doc);
+        Check("push local project online", pushed.Rows >= 20, $"{pushed.Rows} rows, head {pushed.HeadSeq}");
+        var pulled = await api.PullAsync(pushed.AqcProjectId);
+        var rebuilt = ProjectMapper.FromSync(pulled.Settings, pulled.Rows);
+        Check("pull rebuilds the same take-off rows", System.Text.Json.Nodes.JsonNode.DeepEquals(doc["masonry"], rebuilt["masonry"]) && System.Text.Json.Nodes.JsonNode.DeepEquals(doc["columns"], rebuilt["columns"]));
+        try { await api.PushOnlineAsync(unbound.ProjectOfficeId, doc); Check("a project binds only once", false); }
+        catch (ConnectException e) { Check("a project binds only once", e.Status == 400, e.Message); }
+    }
+}
+else Console.WriteLine("SKIP push — every project is already bound");
+
 // Wrong password.
 using var bad = new ConnectClient(new Uri(url), new InMemoryTokenStore());
 try { await bad.SignInAsync(email, "definitely-wrong", "x"); Check("wrong password refused", false); }
