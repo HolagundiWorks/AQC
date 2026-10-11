@@ -37,9 +37,13 @@ public static class CadImportService
         var u = _undo; _undo = null; u?.Invoke();
     }
 
+    /// <summary>"Export for CAD": project details, floors above the plinth and beam depths, as hcw-aqc-bridge v1 JSON.</summary>
+    public static string BuildExport() => CadExporter.Build(BuildModel(ProjectStore.Current));
+
     static ImportModel BuildModel(ProjectStore s)
     {
         var m = new ImportModel();
+        m.Project["prepared_by_name"] = s.Info.PreparedByName;
         foreach (var l in s.Levels)
             m.Levels.Add(new LevelRec { Id = l.Id, Name = l.Name, HeightMm = l.HeightMm, SlabThicknessMm = l.SlabThicknessMm, BeamDepthMm = l.BeamDepthMm });
         m.Project["name"] = s.Info.Name;
