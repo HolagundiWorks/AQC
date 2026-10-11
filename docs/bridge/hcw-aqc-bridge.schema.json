@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HolagundiWorks/hcwCAD-KIT/docs/bridge/hcw-aqc-bridge.schema.json",
+  "title": "hcw-aqc-bridge v1",
+  "description": "What hcwCAD-KIT sends to AQC: the project, the levels and the take-off facts measured in a drawing. All lengths are millimetres, areas are square metres. The plugin sends geometry facts; AQC does the arithmetic.",
+  "type": "object",
+  "required": ["format", "version", "source", "units"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "hcw-aqc-bridge" },
+    "version": { "const": 1 },
+    "units": { "const": "mm" },
+    "source": {
+      "type": "object",
+      "required": ["app", "drawing_id", "exported"],
+      "properties": {
+        "app": { "type": "string" },
+        "host": { "type": "string" },
+        "drawing": { "type": "string" },
+        "drawing_id": { "type": "string", "minLength": 1, "description": "A GUID kept inside the drawing; rows are matched on it and on each ref when the file is imported again." },
+        "exported": { "type": "string", "format": "date-time" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "client_name": { "type": "string" },
+        "company_name": { "type": "string" },
+        "prepared_by_name": { "type": "string" },
+        "location": { "type": "string" },
+        "address": { "type": "string" },
+        "pid": { "type": "string" },
+        "site_area_m2": { "type": "number", "minimum": 0 },
+        "plot_use": { "type": "string" }
+      }
+    },
+    "levels": {
+      "type": "array",
+      "description": "The floors above the plinth, in order. AQC maps them by name and then by position to Lvl1, Lvl2 ...; Lvl0 (plinth) stays with AQC.",
+      "items": {
+        "type": "object",
+        "required": ["name", "height_mm", "slab_thickness_mm", "beam_depth_mm"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "height_mm": { "type": "number", "exclusiveMinimum": 0, "description": "Floor to floor (finished floor to finished floor); AQC reads it as slab-top to slab-top." },
+          "slab_thickness_mm": { "type": "number", "minimum": 0 },
+          "beam_depth_mm": { "type": "number", "minimum": 0, "description": "AQC computes the clear column height as height - slab - beam depth." },
+          "ceiling_mm": { "type": "number", "minimum": 0 },
+          "lintel_bottom_mm": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "beam_depths_mm": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 } },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "level", "length_mm", "height_mm", "thickness_mm"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1, "description": "The plugin's wall id, for example W0001." },
+          "level": { "type": "string" },
+          "length_mm": { "type": "number", "exclusiveMinimum": 0, "description": "Centre-line length." },
+          "height_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "thickness_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "unit_type": { "enum": ["Brick", "ACC Block", "Cement Block"] },
+          "layer": { "type": "string" }
+        }
+      }
+    },
+    "openings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "kind", "mark", "level", "width_mm", "height_mm"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1, "description": "The block's handle in the drawing." },
+          "kind": { "enum": ["Door", "Window"] },
+          "mark": { "type": "string", "description": "Standard marks: D1 800, D2 900, D3 1200; W1 600, W2 900, W3 1200, W4 1500, W5 2000; V1 600 (a ventilator is a window)." },
+          "level": { "type": "string" },
+          "width_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "height_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "sill_mm": { "type": "number", "minimum": 0 },
+          "type": { "type": "string", "description": "single, double or sliding for a door." },
+          "wall_ref": { "type": "string", "description": "The ref of the wall it is cut in; empty when the wall is not a wall object." }
+        }
+      }
+    },
+    "opening_schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["mark", "kind", "width_mm", "height_mm", "nos"],
+        "properties": {
+          "mark": { "type": "string" },
+          "kind": { "enum": ["Door", "Window"] },
+          "width_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "height_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "sill_mm": { "type": "number", "minimum": 0 },
+          "nos": { "type": "integer", "minimum": 0 },
+          "type": { "type": "string" }
+        }
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "mark", "level", "width_mm", "depth_mm"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "mark": { "type": "string" },
+          "level": { "type": "string" },
+          "width_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "depth_mm": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+    "lintels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "level", "opening_mm", "width_mm", "depth_mm"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "mark": { "type": "string" },
+          "level": { "type": "string" },
+          "opening_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "bearing_mm": { "type": "number", "minimum": 0 },
+          "width_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "depth_mm": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "name", "level", "area_m2"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "name": { "type": "string" },
+          "level": { "type": "string" },
+          "area_m2": { "type": "number", "exclusiveMinimum": 0 },
+          "length_mm": { "type": "number", "minimum": 0 },
+          "breadth_mm": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "slabs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "level", "area_m2", "thickness_mm"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "level": { "type": "string" },
+          "area_m2": { "type": "number", "exclusiveMinimum": 0 },
+          "thickness_mm": { "type": "number", "exclusiveMinimum": 0 },
+          "length_mm": { "type": "number", "minimum": 0 },
+          "breadth_mm": { "type": "number", "minimum": 0 },
+          "rectangular": { "type": "boolean", "description": "False when span x and span y are only the bounding box of an outline; AQC should treat the row as area-based." }
+        }
+      }
+    }
+  }
+}

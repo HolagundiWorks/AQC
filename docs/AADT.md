@@ -2,21 +2,23 @@
 
 Instructions for anyone (person or agent) working on AQC. Written 2026-10-11 on the owner's instruction; updated the same day when the CAD tools moved to AADT.
 
-## Status: the take-off tools are moving from hcwCAD-KIT to AADT
+## Status: hcwCAD-KIT is dropped; AADT is the CAD program
 
-**AADT** (<https://github.com/HolagundiWorks/AADT>, private) is the owner's own CAD program, written in Rust. The take-off toolkit that began as **hcwCAD-KIT** (an AutoCAD plugin, <https://github.com/HolagundiWorks/hcwCAD-KIT>) is being moved into it, so that measuring and exporting happen inside AADT and not inside AutoCAD, BricsCAD or ZWCAD.
+**Decision (owner, 2026-10-11):** the AutoCAD plugin hcwCAD-KIT (<https://github.com/HolagundiWorks/hcwCAD-KIT>) is dropped. Its tools are being rebuilt as built-in commands inside **AADT** (<https://github.com/HolagundiWorks/AADT>, the owner's own CAD program, written in Rust; private). Measuring and exporting happen inside AADT, not inside AutoCAD, BricsCAD or ZWCAD.
 
-* **AADT is under development.** The owner will share it here when it is ready. Until then nothing in AQC depends on AADT, and nothing here has been checked against it. Do not guess its commands, file layout or export code.
-* **hcwCAD-KIT stays the reference writer of the bridge file** until AADT produces the same file. Everything below that says "the plugin" or `HCWBRIDGE` describes hcwCAD-KIT today; read it as "the CAD program" and expect AADT to replace it.
-* **The file contract does not change with the move.** AQC reads `hcw-aqc-bridge` v1 and does not care which program wrote it. `source.app` in the file says who did (`hcwCAD-KIT` today). A different `source.app` is not a reason to refuse a file.
+**How far the port had got** (read from AADT's `docs/hcw-kit-port.md` on 2026-10-11, not run): layer sets, `room` and `rarea` are done. **Still to do there:** room extras, notes and fields, **take-off** (`MLIN`, `MBRK`, `MBML`, `MCOL`, `MREC`, `MPAINT`, `MCEIL`, `MFLOOR`, `MAREA`, `MSLAB`, schedule, CSV export), the generators and the wall / door / window tools, and **project data, floors and the bridge file** (item 5, last). So **AADT cannot yet write the bridge file**, and AQC has never imported a file from it. Re-read that document before relying on this paragraph; it will go out of date.
+
+* **The file contract does not change with the move.** AQC reads `hcw-aqc-bridge` v1 and does not care which program wrote it. `source.app` in the file says who did; a `source.app` other than `hcwCAD-KIT` is not a reason to refuse a file.
+* **The contract now lives in AQC:** [bridge/](bridge/README.md) holds the schema, the two sample files, the contract README and the importer spec, copied from hcwCAD-KIT (MIT; licence text in `bridge/LICENSE-hcwCAD-KIT-MIT`). This repo is the authority for it from now on; hcwCAD-KIT's copy is frozen. A new field or a changed unit is a new `version`, decided by the owner, and AADT must be told.
 * **The `hcwcad:` prefix in `source` stays** (`hcwcad:<drawing_id>`). It is stored in users' projects, so renaming it would break re-import. If the owner wants it renamed, that is a migration, decided by the owner.
-* **Still open for the owner:** where the contract (schema, samples, spec) lives once hcwCAD-KIT is retired, and whether AADT writes the file or AQC reads AADT's own drawing format. Until the owner decides, the contract text stays in the hcwCAD-KIT repo.
+* **hcwCAD-KIT is still the only program that writes the file today.** Where this document says "the plugin" or `HCWBRIDGE`, it describes hcwCAD-KIT's behaviour, which is the behaviour AADT's bridge command has to match.
+* **Still open for the owner:** whether AADT writes the `hcw-aqc-bridge` file (the assumption here) or AQC reads AADT's own drawing format, and what AADT's export command is called. Do not guess; ask.
 
 ## The rule
 
-**Quantity take-off from a drawing happens in the CAD program, not in AQC.** Today that is hcwCAD-KIT (an AutoCAD plugin, BricsCAD and ZWCAD builds share its source); it is moving into AADT (see Status above). It measures walls, openings, columns, lintels, rooms and floors from the real geometry, and hands them to AQC in a file. **AQC does not re-measure them.** AQC takes the measured facts and does everything after that: derived quantities, rates, estimates, bar bending schedules, billing, the rest of the suite.
+**Quantity take-off from a drawing happens in the CAD program, not in AQC.** That is AADT (see Status above); its toolkit began as the AutoCAD plugin hcwCAD-KIT, now dropped. It measures walls, openings, columns, lintels, rooms and floors from the real geometry, and hands them to AQC in a file. **AQC does not re-measure them.** AQC takes the measured facts and does everything after that: derived quantities, rates, estimates, bar bending schedules, billing, the rest of the suite.
 
-| CAD program (hcwCAD-KIT today, AADT next) | AQC |
+| AADT (CAD) | AQC |
 |---|---|
 | Measures lengths, heights, thicknesses, areas, counts and sizes from the drawing, in millimetres | Imports them as rows and keeps them as the take-off |
 | Walls, doors and windows (with standard marks), columns, lintels, rooms, floors, project details, beam depths | Derives plaster, painting, skirting, shuttering and the rest through its link rules |
@@ -26,7 +28,7 @@ AQC's own PDF take-off (`TakeoffPage`) is for drawings that have no CAD source. 
 
 ## The bridge file
 
-The two programs meet only through a JSON file, never through shared code. The format is `hcw-aqc-bridge`, version 1, one file per drawing (`<drawing>.aqcbridge.json`). The contract is kept in the hcwCAD-KIT repo (MIT licence, so the schema and sample files may be copied here):
+The two programs meet only through a JSON file, never through shared code. The format is `hcw-aqc-bridge`, version 1, one file per drawing (`<drawing>.aqcbridge.json`). The contract is kept in this repo, in `docs/bridge/` (copied from hcwCAD-KIT, MIT):
 
 * README and rules: `docs/bridge/README.md`
 * JSON Schema: `docs/bridge/hcw-aqc-bridge.schema.json`
@@ -47,14 +49,14 @@ Read the spec before changing the importer. The rules that matter most:
 
 ## What is built in AQC, and what is next
 
-**Built (branch `feat/cad-import`, 2026-10-11):** items 1 and 2 below. `BBSDesktop/AQC.CadImport` (library, plain `net8.0`) and `BBSDesktop/AQC.CadImport.Tests` (13 xUnit tests on the two sample files: `dotnet test BBSDesktop/AQC.CadImport.Tests`, all pass), and File > **Import from CAD...** / **Undo last CAD import** in `BBSApp` (`Services/CadImportService.cs`). `BBSApp` builds. The menu items and the preview dialog have **not been run**, and no real file from hcwCAD-KIT or AADT has been imported. Item 3 (Export for CAD) is not built.
+**Built (merged to `main`, 2026-10-11):** items 1 and 2 below. `BBSDesktop/AQC.CadImport` (library, plain `net8.0`) and `BBSDesktop/AQC.CadImport.Tests` (13 xUnit tests on the two sample files: `dotnet test BBSDesktop/AQC.CadImport.Tests`, all pass), and File > **Import from CAD...** / **Undo last CAD import** in `BBSApp` (`Services/CadImportService.cs`). `BBSApp` builds. The menu items and the preview dialog have **not been run**, and no real file from hcwCAD-KIT or AADT has been imported. Item 3 (Export for CAD) is not built.
 
 1. **A small plain `net8.0` class library** (no WinUI) that reads the file and returns an import plan, with xUnit tests that use the two sample files (the seven tests are listed in the spec). AQC has no C# tests today; this library can be built and tested without the WinUI workload.
 2. **One menu item, "Import from CAD"**, in `BBSApp`, that calls the library, shows the preview and applies the plan.
 3. **"Export for CAD"**: AQC writes `levels`, `project` (name, client, company, address) and `beam_depths_mm` in the same v1 format, so the plugin's `HCWBRIDGEIMPORT` can read them. The plugin applies them only after the user says Yes, and never changes drawn geometry.
-4. Keep the contract authority in the hcwCAD-KIT repo. If the importer needs a field the contract lacks, ask the owner: a new field or a changed unit is a new `version`, decided by the owner, in both repos together.
+4. The contract authority is `docs/bridge/` in this repo. If the importer needs a field the contract lacks, ask the owner: a new field or a changed unit is a new `version`, decided by the owner, and AADT must be told.
 
-## What hcwCAD-KIT already does (the writer AADT must match)
+## What hcwCAD-KIT did (the behaviour AADT must match)
 
 * `HCWBRIDGE` writes the file next to the saved drawing (floors with beam depth, wall objects, doors and windows with standard marks and their schedule, columns, lintels, rooms). Slabs are not sent yet.
 * `HCWBRIDGEIMPORT` reads a v1 file and applies floors, project details and beam depths on a Yes.
@@ -70,6 +72,6 @@ Read the spec before changing the importer. The rules that matter most:
 ## Rules for working across the two repos
 
 * **Do not copy code between the repos.** AQC is AGPL-3.0 or commercial; hcwCAD-KIT is MIT, and AADT is MIT OR Apache-2.0 (as its README states). Only the file contract (schema, sample files, spec text) is shared.
-* **Do not edit the hcwCAD-KIT or AADT repos from here.** Two agents work there (a local one that builds and tests, a cloud one that develops) under its own rules (`docs/AGENTS.md` in that repo). Ask the owner for anything you need from it.
+* **Do not edit the AADT or hcwCAD-KIT repos from here.** Ask the owner for anything you need from them.
 * **Say only what you have run.** Never write "works" or "tested" for the importer without the check, the commit and, for anything involving a CAD program, a result from a real run.
 * The owner decides names, defaults, file formats and what is in version 1.

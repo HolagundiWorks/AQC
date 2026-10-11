@@ -1,6 +1,6 @@
 # AQC: notes for any Claude agent in this repo
 
-**Quantity take-off from drawings is done in the CAD program, not in AQC.** Today that is hcwCAD-KIT (<https://github.com/HolagundiWorks/hcwCAD-KIT>, an AutoCAD plugin); the toolkit is moving into **AADT** (<https://github.com/HolagundiWorks/AADT>, the owner's own CAD program, in development; the owner will share it here when it is ready). The CAD program measures walls, openings, columns, lintels, rooms and floors and hands them to AQC in a JSON file (`hcw-aqc-bridge` v1, millimetres). AQC imports those measured facts and does everything after: derived quantities, rates, estimates, bar bending schedules.
+**Quantity take-off from drawings is done in the CAD program, not in AQC. That program is AADT** (<https://github.com/HolagundiWorks/AADT>, the owner's own CAD program, in Rust). The AutoCAD plugin hcwCAD-KIT is **dropped**; its tools are being rebuilt as built-in AADT commands, and AADT cannot write the bridge file yet. The CAD program measures walls, openings, columns, lintels, rooms and floors and hands them to AQC in a JSON file (`hcw-aqc-bridge` v1, millimetres, contract in `docs/bridge/`). AQC imports those measured facts and does everything after: derived quantities, rates, estimates, bar bending schedules.
 
 Read **[docs/AADT.md](docs/AADT.md)** before touching imports, levels, take-off or the bridge. In short:
 
@@ -9,6 +9,6 @@ Read **[docs/AADT.md](docs/AADT.md)** before touching imports, levels, take-off 
 - `Lvl0` (plinth) is AQC's; an import never changes it. Match levels by name, then by position.
 - Never import plaster, painting, skirting, shuttering or rebar: AQC derives them.
 - Preview first, one undo step, never delete a row that has gone from the file.
-- Do not guess AADT's commands, files or export code; nothing here has been checked against it yet. Do not copy code between AQC (AGPL) and the CAD repos (MIT); share only the file contract. Do not edit the hcwCAD-KIT or AADT repos from here.
+- Do not guess AADT's commands, files or export code; nothing here has been checked against it. Do not copy code between AQC (AGPL) and AADT or hcwCAD-KIT; share only the file contract (`docs/bridge/` is the authority). Do not edit the AADT or hcwCAD-KIT repos from here.
 - Say only what you have run. No "works" or "tested" without the check and the commit.
 - The owner decides file formats, names, defaults and scope.
