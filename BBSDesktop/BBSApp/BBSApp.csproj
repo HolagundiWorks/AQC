@@ -106,6 +106,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Aorms.Bridge\Aorms.Bridge.csproj" />
+    <ProjectReference Include="..\AQC.CadImport\AQC.CadImport.csproj" />
   </ItemGroup>
 </Project>
 
