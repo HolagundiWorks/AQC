@@ -15,7 +15,7 @@ Server side + full spec live in the AORMS repo (`HolagundiWorks/aorms`): `docs/e
 | A6 | `RateBooksApi.cs` | shared rate books: list, get, publish (idempotent, duplicate codes refused), activate, and the sign-in merge `Plan` (match on `client_id`; never overwrites silently) |
 | A3 | `ProjectSync.cs` | edit lease (renew 60 s / retry 30 s), persistent `Outbox`, 2 s debounce, 500-row batches, 423 re-acquire, 400 row isolation, offline back-off, `session_replaced` stop, catch-up that asks for review when local changes exist |
 
-Tests: `BBSDesktop/Aorms.Connect.Tests` (67 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
+Tests: `BBSDesktop/Aorms.Connect.Tests` (80 xunit, fake HTTP). Live walkthrough: `BBSDesktop/Aorms.Connect.Smoke`.
 
 ## NOT built / NOT verified (this is the local agent's job)
 
@@ -31,7 +31,7 @@ Tests: `BBSDesktop/Aorms.Connect.Tests` (67 xunit, fake HTTP). Live walkthrough:
 
 ```
 cd BBSDesktop
-dotnet test Aorms.Connect.Tests          # expect 67 passed
+dotnet test Aorms.Connect.Tests          # expect 80 passed
 ```
 
 ## Run the live walkthrough
@@ -78,6 +78,16 @@ unlinked account).
 - Smoke: `AORMS_BIG=1500` pushes/pulls a synthetic project and a big rate book (binds one more unbound demo project).
 - **Server fix this found (aorms):** PostgREST caps responses at 1000 rows, so pulling >1000 rows silently truncated; fixed server-side in aorms (page = 1000; rate-book items paged). Needs the aorms PR `claude/aqc-page-cap` deployed.
 - **Still only testable on Windows:** a real multi-day offline, token refresh across hours, two writers, Credential Manager.
+
+## Suite sign-in (AAD + AQC) — added 2026-10-11
+
+Decision (owner): one AORMS login across AAD (CAD, repo `HolagundiWorks/AADT`) and AQC; separate apps; take-off from CAD reaches AQC **via the portal**. Authority: `docs/esti/AORMS-SUITE-SIGNIN.md` in the aorms repo.
+
+* `ConnectClient` now takes `app` (`"aqc"` default, `"aad"`) and an optional `ISharedSignInStore`. Sessions are per app (server migration `0111`), so AAD and AQC don't replace each other; a second sign-in of the same app still does.
+* **Shared sign-in store — TO WRITE (Windows, in the app project):** a Credential Manager generic credential, target `AORMS/Connect`, user = email, blob `{ "v":1, "refreshToken", "email", "updatedAt" }`, implementing `ISharedSignInStore`. The per-app `IConnectTokenStore` keeps only the session id (e.g. `AORMS/Connect/aqc`). Rotation rule (implemented and unit-tested in `ConnectClient`): re-read the shared token before refreshing; write the rotated token back immediately; on a refusal re-read once and retry if it changed; otherwise sign out and keep unsent work.
+* `CadBridgeApi`: `ListAsync`, `DownloadLatestAsync` (newest `cad_bridge` version that has a file → JSON text for the **unchanged** `AQC.CadImport`), `PublishAsync` (what AAD does). **App wiring to do:** File ▸ Import from CAD gets a "From AORMS" source for the bound project.
+* Smoke now also checks: AAD+AQC separate sessions both stay connected, AQC lists a `cad_bridge` AAD published, sign-out clears the shared login.
+* **Only testable on Windows:** two apps refreshing within seconds of each other against the real shared credential; both apps connected at once; a real AAD→portal→AQC round trip. The file upload step is also still unverified (no storage keys locally).
 
 ## Known server notes
 

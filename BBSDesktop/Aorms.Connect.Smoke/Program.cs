@@ -169,6 +169,31 @@ if (vEmail is not null && vPw is not null)
     Check("viewer is read-only", !vs.CanWrite, $"role {vs.Role}");
 }
 
+// Suite (runs last: signing in as app 'aqc' again replaces the first AQC session, by design): AAD and AQC side by side under one sign-in (shared store), each with its own session; CAD publishes a take-off, AQC lists it.
+{
+    var shared = new InMemorySharedSignInStore();
+    using var aqcApp = new ConnectClient(new Uri(url), new InMemoryTokenStore(), shared: shared, app: "aqc");
+    using var aadApp = new ConnectClient(new Uri(url), new InMemoryTokenStore(), shared: shared, app: "aad");
+    var sq = await aqcApp.SignInAsync(email, password, "Smoke AQC");
+    var sd = await aadApp.SignInAsync(email, password, "Smoke AAD");
+    Check("AAD and AQC hold separate sessions", sq.SessionId != sd.SessionId && shared.Load() is not null);
+    var okA = (await aqcApp.RefreshSessionAsync()).SessionId == sq.SessionId;
+    var okB = (await aadApp.RefreshSessionAsync()).SessionId == sd.SessionId;
+    Check("both stay connected (neither replaced the other)", okA && okB);
+    var bound = (await new ProjectsApi(aadApp).ListAsync()).FirstOrDefault(p => p.IsBound);
+    if (bound is not null && sd.CanWrite)
+    {
+        var bridge = new CadBridgeApi(aadApp);
+        var hash = "smoke-cad-" + Guid.NewGuid().ToString("N");
+        var vid = await new VersionsApi(aadApp).AddAsync(bound.Aqc!.Id, VersionKinds.CadBridge, hash, new System.Text.Json.Nodes.JsonObject { ["drawing_id"] = "smoke" });
+        var listed = await new CadBridgeApi(aqcApp).ListAsync(bound.Aqc!.Id);
+        Check("AQC lists the CAD take-off AAD published", listed.Any(v => v.Version.ToString() == vid), $"{listed.Count} versions");
+        Check("cad_bridge without a file yields no download", await bridge.DownloadLatestAsync(bound.Aqc!.Id) is null || listed.Any(v => v.HasFile));
+    }
+    aqcApp.SignOut();
+    Check("signing out of one app clears the shared login", shared.Load() is null);
+}
+
 a.SignOut();
 Check("sign out clears the store", storeA.Load() is null && !a.IsConnected);
 Console.WriteLine(failures == 0 ? "\nAll checks passed." : $"\n{failures} check(s) failed.");

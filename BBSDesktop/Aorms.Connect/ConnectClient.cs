@@ -47,8 +47,17 @@ public sealed class ConnectClient : IDisposable
     private DateTimeOffset _expires;
     private string? _email;
 
-    public ConnectClient(Uri baseUri, IConnectTokenStore store, HttpMessageHandler? handler = null, Func<DateTimeOffset>? clock = null)
+    private readonly ISharedSignInStore? _shared;
+
+    /// <summary>The suite app this client is: <c>"aqc"</c> (default) or <c>"aad"</c>. Sessions are one per user per app.</summary>
+    public string App { get; }
+
+    /// <param name="shared">Optional sign-in shared with the other suite apps on this machine; when given, refresh tokens are exchanged
+    /// through it with the re-read-before-refresh rule (rotation-safe). Without it the client behaves as a standalone app.</param>
+    public ConnectClient(Uri baseUri, IConnectTokenStore store, HttpMessageHandler? handler = null, Func<DateTimeOffset>? clock = null,
+        ISharedSignInStore? shared = null, string app = "aqc")
     {
+        _shared = shared; App = app;
         _http = handler is null ? new HttpClient() : new HttpClient(handler, disposeHandler: false);
         _http.BaseAddress = baseUri;
         _http.Timeout = TimeSpan.FromSeconds(60);
@@ -98,7 +107,7 @@ public sealed class ConnectClient : IDisposable
         SessionInfo s;
         try
         {
-            s = await PostRawAsync<SessionInfo>("api/aqc/v1/session", new { clientLabel }, _access, session: null, ct).ConfigureAwait(false);
+            s = await PostRawAsync<SessionInfo>("api/aqc/v1/session", new { clientLabel, app = App }, _access, session: null, ct).ConfigureAwait(false);
         }
         catch (ConnectException e) when (e.IsNotConnected) { Session = null; NotConnected?.Invoke(e); throw; }
         Session = s;
@@ -116,8 +125,12 @@ public sealed class ConnectClient : IDisposable
     public async Task<RestoreOutcome> RestoreAsync(CancellationToken ct = default)
     {
         var stored = _store.Load();
-        if (stored is null || string.IsNullOrEmpty(stored.RefreshToken)) return RestoreOutcome.NoStoredSession;
-        _refresh = stored.RefreshToken; _email = stored.Email;
+        var shared = _shared?.Load();
+        // The shared sign-in is the freshest token (another suite app may have rotated it); the per-app entry only supplies the session id.
+        var token = shared?.RefreshToken is { Length: > 0 } st ? st : stored?.RefreshToken;
+        if (string.IsNullOrEmpty(token)) return RestoreOutcome.NoStoredSession;
+        stored ??= new StoredSession(token, null, shared?.Email);
+        _refresh = token; _email = shared?.Email ?? stored.Email;
         try
         {
             await RefreshAsync(ct).ConfigureAwait(false);
@@ -146,6 +159,7 @@ public sealed class ConnectClient : IDisposable
     {
         ClearLocal();
         _store.Clear();
+        _shared?.Clear(); // signing out of one suite app signs out of the shared login; the others find it empty on their next refresh
     }
 
     // ── authenticated calls (used by later steps) ──────────────────────────────────────────────────────────────
@@ -193,23 +207,29 @@ public sealed class ConnectClient : IDisposable
             var cfg = await GetConfigAsync(ct).ConfigureAwait(false);
             if (string.IsNullOrEmpty(cfg.SupabaseUrl) || string.IsNullOrEmpty(cfg.SupabaseAnonKey) || _refresh is null)
                 throw new ConnectException(401, "invalid_token", "Your sign-in expired. Sign in again.");
-            using var req = new HttpRequestMessage(HttpMethod.Post, $"{cfg.SupabaseUrl.TrimEnd('/')}/auth/v1/token?grant_type=refresh_token")
+
+            // Another suite app may have rotated the shared token since we last looked: use the newest one.
+            if (_shared?.Load() is { } latest && !string.IsNullOrEmpty(latest.RefreshToken)) _refresh = latest.RefreshToken;
+
+            var res = await SendRefreshAsync(cfg, _refresh, ct).ConfigureAwait(false);
+            if (!res.ok && IsRefused(res.status) && _shared?.Load() is { } again && !string.IsNullOrEmpty(again.RefreshToken) && again.RefreshToken != _refresh)
             {
-                Content = new StringContent(JsonSerializer.Serialize(new { refresh_token = _refresh }), Encoding.UTF8, "application/json"),
-            };
-            req.Headers.Add("apikey", cfg.SupabaseAnonKey);
-            using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+                // Refused, but the shared token changed while we were refreshing (the other app won the race): retry once with it.
+                _refresh = again.RefreshToken;
+                res = await SendRefreshAsync(cfg, _refresh, ct).ConfigureAwait(false);
+            }
             // Only a refused refresh token ends the sign-in. A busy/failing auth server (5xx, 429) must not sign anyone out:
             // the caller keeps its work and tries again later.
-            if (!res.IsSuccessStatusCode && ((int)res.StatusCode >= 500 || (int)res.StatusCode == 429 || (int)res.StatusCode == 408))
-                throw new ConnectException((int)res.StatusCode, "unavailable", "AORMS sign-in isn't available right now.");
-            if (!res.IsSuccessStatusCode)
+            if (!res.ok && !IsRefused(res.status))
+                throw new ConnectException(res.status, "unavailable", "AORMS sign-in isn't available right now.");
+            if (!res.ok)
             {
+                if (_shared?.Load()?.RefreshToken == _refresh) _shared.Clear(); // the shared token is dead too
                 ClearLocal(keepStore: true);
                 SignedOut?.Invoke();
                 throw new ConnectException(401, "invalid_token", "Your sign-in expired. Sign in again.");
             }
-            using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+            using var doc = JsonDocument.Parse(res.body);
             var root = doc.RootElement;
             var expiresAt = root.TryGetProperty("expires_at", out var ea) && ea.TryGetInt64(out var unix)
                 ? DateTimeOffset.FromUnixTimeSeconds(unix)
@@ -218,6 +238,20 @@ public sealed class ConnectClient : IDisposable
             Persist();
         }
         finally { _refreshLock.Release(); }
+    }
+
+    private static bool IsRefused(int status) => status is 400 or 401 or 403;
+
+    private async Task<(bool ok, int status, string body)> SendRefreshAsync(ConnectConfig cfg, string refreshToken, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{cfg.SupabaseUrl.TrimEnd('/')}/auth/v1/token?grant_type=refresh_token")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(new { refresh_token = refreshToken }), Encoding.UTF8, "application/json"),
+        };
+        req.Headers.Add("apikey", cfg.SupabaseAnonKey);
+        using var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        var body = await res.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        return (res.IsSuccessStatusCode, (int)res.StatusCode, body);
     }
 
     // ── plumbing ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -229,7 +263,9 @@ public sealed class ConnectClient : IDisposable
 
     private void Persist()
     {
-        if (_refresh is not null) _store.Save(new StoredSession(_refresh, Session?.SessionId, _email));
+        if (_refresh is null) return;
+        _store.Save(new StoredSession(_refresh, Session?.SessionId, _email));
+        _shared?.Save(new SharedSignIn(_refresh, _email, _now()));
     }
 
     private void ClearLocal(bool keepStore = false)

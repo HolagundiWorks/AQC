@@ -13,5 +13,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Aorms.Connect\Aorms.Connect.csproj" />
   </ItemGroup>
-  <ItemGroup><None Include="pilot-sample.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Include="pilot-sample.json" CopyToOutputDirectory="PreserveNewest" /><None Include="small-house.bridge.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>
