@@ -8,11 +8,12 @@ Instructions for anyone (person or agent) working on AQC. Written 2026-10-11 on 
 
 **How far the port had got** (read from AADT's `docs/hcw-kit-port.md` on 2026-10-11, not run): layer sets, `room` and `rarea` are done. **Still to do there:** room extras, notes and fields, **take-off** (`MLIN`, `MBRK`, `MBML`, `MCOL`, `MREC`, `MPAINT`, `MCEIL`, `MFLOOR`, `MAREA`, `MSLAB`, schedule, CSV export), the generators and the wall / door / window tools, and **project data, floors and the bridge file** (item 5, last). So **AADT cannot yet write the bridge file**, and AQC has never imported a file from it. Re-read that document before relying on this paragraph; it will go out of date.
 
-* **The file contract does not change with the move.** AQC reads `hcw-aqc-bridge` v1 and does not care which program wrote it. `source.app` in the file says who did; a `source.app` other than `hcwCAD-KIT` is not a reason to refuse a file.
+* **The file contract does not change with the move.** AQC reads `hcw-aqc-bridge` v1 and does not care which program wrote it. `source.app` in the file says who did (`hcwCAD-KIT` in the samples, AADT's name once it writes the file); AQC must not refuse a file because of its `source.app`.
 * **The contract now lives in AQC:** [bridge/](bridge/README.md) holds the schema, the two sample files, the contract README and the importer spec, copied from hcwCAD-KIT (MIT; licence text in `bridge/LICENSE-hcwCAD-KIT-MIT`). This repo is the authority for it from now on; hcwCAD-KIT's copy is frozen. A new field or a changed unit is a new `version`, decided by the owner, and AADT must be told.
 * **The `hcwcad:` prefix in `source` stays** (`hcwcad:<drawing_id>`). It is stored in users' projects, so renaming it would break re-import. If the owner wants it renamed, that is a migration, decided by the owner.
 * **hcwCAD-KIT is still the only program that writes the file today.** Where this document says "the plugin" or `HCWBRIDGE`, it describes hcwCAD-KIT's behaviour, which is the behaviour AADT's bridge command has to match.
-* **Still open for the owner:** whether AADT writes the `hcw-aqc-bridge` file (the assumption here) or AQC reads AADT's own drawing format, and what AADT's export command is called. Do not guess; ask.
+* **Decided (owner, 2026-10-11): AADT writes the `hcw-aqc-bridge` v1 file.** AQC does not read AADT's own drawing format. AADT's port plan lists this as its last item (project data, floors, bridge file). What AADT builds must follow `docs/bridge/` here and the behaviour in "What hcwCAD-KIT did" below.
+* **Still open for the owner:** what AADT's export command is called, and whether AADT also reads the file back (the `HCWBRIDGEIMPORT` direction: levels, project details, beam depths). Do not guess; ask.
 
 ## The rule
 

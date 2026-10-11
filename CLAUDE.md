@@ -1,6 +1,6 @@
 # AQC: notes for any Claude agent in this repo
 
-**Quantity take-off from drawings is done in the CAD program, not in AQC. That program is AADT** (<https://github.com/HolagundiWorks/AADT>, the owner's own CAD program, in Rust). The AutoCAD plugin hcwCAD-KIT is **dropped**; its tools are being rebuilt as built-in AADT commands, and AADT cannot write the bridge file yet. The CAD program measures walls, openings, columns, lintels, rooms and floors and hands them to AQC in a JSON file (`hcw-aqc-bridge` v1, millimetres, contract in `docs/bridge/`). AQC imports those measured facts and does everything after: derived quantities, rates, estimates, bar bending schedules.
+**Quantity take-off from drawings is done in the CAD program, not in AQC. That program is AADT, and AADT writes the bridge file** (<https://github.com/HolagundiWorks/AADT>, the owner's own CAD program, in Rust). The AutoCAD plugin hcwCAD-KIT is **dropped**; its tools are being rebuilt as built-in AADT commands, and AADT cannot write the bridge file yet. The CAD program measures walls, openings, columns, lintels, rooms and floors and hands them to AQC in a JSON file (`hcw-aqc-bridge` v1, millimetres, contract in `docs/bridge/`). AQC imports those measured facts and does everything after: derived quantities, rates, estimates, bar bending schedules.
 
 Read **[docs/AADT.md](docs/AADT.md)** before touching imports, levels, take-off or the bridge. In short:
 
